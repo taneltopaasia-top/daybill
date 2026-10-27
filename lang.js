@@ -1546,7 +1546,13 @@ const EN=/*EN-START*/{
 "Ilma KM-ta = enne käibemaksu. Kokku = koos käibemaksuga. Projektid, tunnid ja mustandid salvestuvad automaatselt.":"Excl. VAT = before VAT. Total = including VAT. Projects, hours and drafts are saved automatically.",
 "Uue projekti nimi":"New project name",
 ". Programm annab selle ise, kordumist ei saa tekkida.":". The app assigns it itself, so duplicates cannot happen.",
-"Programm annab selle ise, kordumist ei saa tekkida.":"The app assigns it itself, so duplicates cannot happen."
+"Programm annab selle ise, kordumist ei saa tekkida.":"The app assigns it itself, so duplicates cannot happen.",
+"Välimus":"Appearance",
+"Automaatne":"Automatic",
+"Hele":"Light",
+"Tume":"Dark",
+"Välimus: {0}":"Appearance: {0}",
+"„Automaatne” järgib telefoni või arvuti seadet: päeval hele, öösel tume.":"“Automatic” follows your phone or computer setting: light by day, dark at night."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

@@ -1,14 +1,14 @@
 /* Daybill: Hoursi kujundus + rakenduse riba, kell, arved ja seaded. */
 html{-webkit-text-size-adjust:100%}
 body{padding-bottom:env(safe-area-inset-bottom)}
-.db-bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #000;padding-top:env(safe-area-inset-top)}
+.db-bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--fg);padding-top:env(safe-area-inset-top)}
 .db-bar-in{max-width:940px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:14px}
 .db-brand{font-size:19px;font-weight:600;letter-spacing:-.5px;flex:1;display:flex;align-items:center;gap:9px}
 .db-brand img{width:26px;height:26px;border-radius:6px}
 .db-nav{display:flex;gap:6px}
 .db-gear{order:3;min-height:36px;padding:7px 12px}
 .db-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.db-meter{height:10px;border:1px solid #000;margin:6px 0 10px}.db-meter span{display:block;height:100%;background:#000}
+.db-meter{height:10px;border:1px solid var(--fg);margin:6px 0 10px}.db-meter span{display:block;height:100%;background:var(--fg)}
 .db-nav button{min-height:36px;padding:7px 12px}
 .db-sync{font-size:11px;white-space:nowrap}
 main{margin-top:34px}
@@ -18,15 +18,15 @@ main{margin-top:34px}
 /* Kell (telefon) */
 .clock{max-width:460px;margin:0 auto;text-align:center}
 .clock select,.clock input{text-align:left}
-.clock-face{margin:26px auto 18px;width:250px;height:250px;border:2px solid #000;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-.clock-face.on{background:#000;color:#fff}
+.clock-face{margin:26px auto 18px;width:250px;height:250px;border:2px solid var(--fg);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.clock-face.on{background:var(--fg);color:var(--bg)}
 .clock-time{font:500 46px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-1px}
 .clock-sub{font-size:12px;line-height:1.5}
 .clock-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 10px}
 .clock-btns button{min-height:64px;font-size:18px}
 .clock-btns .wide{grid-column:1/-1}
 .clock-list{text-align:left;margin-top:26px}
-.clock-list .row-item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #000;font-size:13px}
+.clock-list .row-item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--fg);font-size:13px}
 .clock-field{text-align:left;margin:12px 0}
 .clock-new{display:flex;gap:8px;margin-top:8px}
 .clock-new button{white-space:nowrap}
@@ -41,18 +41,18 @@ main{margin-top:34px}
 .inv-status{font-size:12px}
 .inv-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
 .inv-filter select,.inv-filter input{width:auto}
-.inv-strip{border:1px solid #000;padding:12px 16px;font-size:13px;margin:0 0 20px}
-.inv-warn{border:2px solid #000;padding:12px 16px;font-size:13px;line-height:1.6;margin:14px 0}
+.inv-strip{border:1px solid var(--fg);padding:12px 16px;font-size:13px;margin:0 0 20px}
+.inv-warn{border:2px solid var(--fg);padding:12px 16px;font-size:13px;line-height:1.6;margin:14px 0}
 .inv-actions button{padding:5px 8px;min-height:30px;font-size:12px}
 .paid td{opacity:.55}
 
 /* Seaded */
-.set-note{border:1px solid #000;padding:14px 16px;font-size:13px;line-height:1.7;margin:0 0 22px}
+.set-note{border:1px solid var(--fg);padding:14px 16px;font-size:13px;line-height:1.7;margin:0 0 22px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:13px}
 .check input{width:auto;min-height:0;margin:3px 0 0}
 
 /* Kell: projekti valikud ja lõpetatud päev */
-.ck-opts{text-align:left;border:1px solid #000;padding:12px 16px;margin:14px 0}
+.ck-opts{text-align:left;border:1px solid var(--fg);padding:12px 16px;margin:14px 0}
 .ck-opts summary{cursor:pointer;font-size:14px;font-weight:500}
 .ck-opts[open] summary{margin-bottom:10px}
 .ck-opts #settings .grid{grid-template-columns:1fr 1fr}
@@ -60,11 +60,11 @@ main{margin-top:34px}
 
 /* Arvepõhi */
 .tpl-logo{min-height:60px;display:flex;align-items:center;margin:0 0 12px}
-.tpl-logo img{max-width:240px;max-height:80px;border:1px solid #000;padding:6px;background:#fff}
+.tpl-logo img{max-width:240px;max-height:80px;border:1px solid var(--fg);padding:6px;background:var(--bg)}
 
 /* Tervitus */
-.db-welcome{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
-.db-welcome-in{background:#fff;border:2px solid #000;max-width:520px;width:100%;padding:24px;font-size:14px;line-height:1.6;max-height:90vh;overflow:auto}
+.db-welcome{position:fixed;inset:0;z-index:60;background:var(--shade);display:flex;align-items:center;justify-content:center;padding:16px}
+.db-welcome-in{background:var(--bg);border:2px solid var(--fg);max-width:520px;width:100%;padding:24px;font-size:14px;line-height:1.6;max-height:90vh;overflow:auto}
 .db-welcome-in h2{margin-top:0}
 
 /* Keelevalik ribal */
@@ -72,10 +72,16 @@ main{margin-top:34px}
 @media(max-width:650px){.ck-opts #settings .grid{grid-template-columns:1fr}}
 
 /* Paigaldamise riba */
-.db-install{border-bottom:1px solid #000;background:#fff}
+.db-install{border-bottom:1px solid var(--fg);background:var(--bg)}
 .db-install-in{max-width:940px;margin:0 auto;padding:10px 24px;display:flex;gap:12px;align-items:center;font-size:13px;line-height:1.5}
 .db-install-in img{width:36px;height:36px;border-radius:8px;flex:none}
 .db-install-in p{margin:0;flex:1}
 .db-install-in button{min-height:34px;padding:6px 12px;white-space:nowrap}
 .db-share{display:inline-block;width:14px;height:16px;vertical-align:-2px}
 @media(max-width:650px){.db-install-in{padding:10px 12px}}
+
+/* Hele / tume */
+.db-theme{order:2;min-height:30px;padding:3px 9px;font-size:15px;line-height:1}
+.tpl-logo img{background:#fff}
+@media(max-width:650px){.db-theme{order:0;min-height:30px}}
+@media(max-width:650px){.db-bar #langSwitch{order:0}.db-bar #langSwitch button{min-height:30px}}

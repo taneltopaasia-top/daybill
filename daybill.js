@@ -182,6 +182,7 @@ function renderSettings(){const lang=(window.HoursI18n&&window.HoursI18n.lang)||
  setView.innerHTML=`<div class="row top"><h1>Seaded</h1></div>
  
  <div class="section"><h2>Keel</h2><div class="actions"><button type="button" data-lang="et" class="${lang==='et'?'primary':''}">Eesti</button><button type="button" data-lang="en" class="${lang==='en'?'primary':''}">English</button></div></div>
+ <div class="section"><h2>Välimus</h2><div class="actions">${[['auto','Automaatne'],['light','Hele'],['dark','Tume']].map(([k,l])=>`<button type="button" data-theme-set="${k}" class="${theme()===k?'primary':''}">${l}</button>`).join('')}</div><p class="help">„Automaatne” järgib telefoni või arvuti seadet: päeval hele, öösel tume.</p></div>
  <div class="section"><h2>Sünkroonimine telefoni ja arvuti vahel</h2><div id="syncBox"></div></div>
  <div class="section" id="storageBox"><h2>Mälu ja piirid</h2>${storageHtml()}</div>
  <div class="section" id="backupBox"><h2>Varukoopia</h2></div>
@@ -189,6 +190,7 @@ function renderSettings(){const lang=(window.HoursI18n&&window.HoursI18n.lang)||
  <p class="help">Daybill · tasuta tööaja ja arvete rakendus filmitegijatele.</p>`;
  if(backup){$d('backupBox').append(backup);backup.open=true;backup.style.margin='0'}
  setView.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{try{window.HoursI18n&&window.HoursI18n.set(b.dataset.lang)}catch(e){}try{localStorage.setItem('hoursLang',b.dataset.lang)}catch(e){}renderSettings()});
+ setView.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeSet);renderSettings()});
  bindStorage($d('storageBox'));
  try{window.daybillRenderSync&&window.daybillRenderSync($d('syncBox'))}catch(e){}
  if(!$d('syncBox').innerHTML)$d('syncBox').innerHTML='<p class="help">Praegu on andmed ainult selles seadmes. Sünkroonimine lisatakse peagi: siis logid telefonis ja arvutis sama e-postiga sisse ja näed kõike mõlemas.</p>'}
@@ -214,7 +216,7 @@ $d('pdfMail')&&($d('pdfMail').onclick=()=>{pdfMode='email';$d('pdf').click();set
 
 /* ---------- paigaldamine avakuvale ---------- */
 // Android/Chrome: brauseri oma „Installi” aken. iPhone: Apple ei luba automaatset paigaldust, seega juhis (Jaga → Lisa avakuvale).
-const SHARE_ICON='<svg class="db-share" viewBox="0 0 14 16" aria-label="Jaga"><path d="M7 1v9M3.5 4.5 7 1l3.5 3.5M2 7H1v8h12V7h-1" fill="none" stroke="#000" stroke-width="1.4"/></svg>';
+const SHARE_ICON='<svg class="db-share" viewBox="0 0 14 16" aria-label="Jaga"><path d="M7 1v9M3.5 4.5 7 1l3.5 3.5M2 7H1v8h12V7h-1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
 let installEvt=null,installBar=null;
 const T_=(et,...v)=>window._t?window._t(et,...v):et.replace(/\{(\d+)\}/g,(m,n)=>v[n]);
 const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -231,6 +233,14 @@ window.addEventListener('appinstalled',()=>{installBar&&installBar.remove()});
 if(iosSafari)showInstall(T_('Lisa Daybill oma avakuvale: vajuta all Jaga {0} ja siis „Lisa avakuvale”.',SHARE_ICON));
 else if(ios)showInstall(T_('Lisa Daybill oma avakuvale: ava see link Safaris, vajuta Jaga {0} ja siis „Lisa avakuvale”.',SHARE_ICON));
 else if(macSafari)showInstall('Lisa Daybill Docki: Safari menüü Fail → „Lisa Docki”.');
+
+/* ---------- hele / tume ---------- */
+function theme(){try{const t=localStorage.getItem('daybill.theme');return t==='dark'||t==='light'?t:'auto'}catch(e){return 'auto'}}
+function setTheme(t){try{if(t==='auto')localStorage.removeItem('daybill.theme');else localStorage.setItem('daybill.theme',t)}catch(e){}if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;markTheme()}
+const themeBtn=document.createElement('button');themeBtn.type='button';themeBtn.className='db-theme';
+function markTheme(){const t=theme();themeBtn.textContent=t==='dark'?'☾':t==='light'?'☀':'◐';themeBtn.title=t==='dark'?'Tume':t==='light'?'Hele':'Automaatne';themeBtn.setAttribute('aria-label','Välimus: '+themeBtn.title)}
+themeBtn.onclick=()=>{const t=theme();setTheme(t==='auto'?'dark':t==='dark'?'light':'auto');if(view==='settings')renderSettings()};
+bar.querySelector('.db-bar-in').insertBefore(themeBtn,bar.querySelector('.db-gear'));markTheme();
 
 /* ---------- käivitus ---------- */
 // EN/ET valik rakenduse ribal.
