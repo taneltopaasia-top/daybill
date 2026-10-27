@@ -31,7 +31,7 @@ loadList();
 const live=()=>list.filter(x=>!x.deleted);
 const creditsOf=x=>live().filter(c=>c.credit&&c.creditFor===x.id);
 function credited(x){return !x.credit&&creditsOf(x).reduce((s,c)=>s+c.gross,0)<=-x.gross+0.005}
-function status(x){if(x.credit)return ['Kreeditarve','credit'];if(credited(x))return ['Krediteeritud','credited'];if(x.paidAt)return ['Makstud','paid'];if(x.due<isoToday())return ['Üle tähtaja','overdue'];return ['Laekumata','open']}
+function status(x){if(x.credit)return ['Kreeditarve','credit'];if(credited(x))return ['Krediteeritud','credited'];if(x.paidAt||x.paid)return ['Makstud','paid'];if(x.due<isoToday())return ['Üle tähtaja','overdue'];return ['Laekumata','open']}
 function forProject(pid){if(!pid)return [];return live().filter(x=>(x.hoursProject===pid||'inv'+x.id===pid)&&!x.credit).map(x=>({id:x.id,number:x.number,date:x.date,gross:x.gross,hoursNet:Number(x.hoursNet??x.net)||0,status:status(x)[0],fullyCredited:credited(x),net:x.net,desc:String(x.rows&&x.rows[0]&&x.rows[0].desc||'')}))}
 
 /* ---------- numeratsioon: NNN/KKAA (igal kuul 001) või AAAA-NNN ---------- */
@@ -40,7 +40,9 @@ function formatNumber(seq,period,fmt){return fmt==='year'?period+'-'+pad(seq,3):
 // Kõik kunagi antud numbrid samas perioodis on kinni, ka tühistatud ja kustutatud kirjetel.
 function usedSeqs(period,fmt){return new Set(list.filter(x=>x.period===period&&(x.numberFormat||'month')===fmt).map(x=>Number(x.seq)))}
 function nextNumber(date){const fmt=settings.numberFormat,period=periodOf(date,fmt),used=usedSeqs(period,fmt);let seq=used.size?Math.max(...used)+1:Math.max(1,Number(settings.firstSeq)||1);while(used.has(seq))seq++;return {seq,period,fmt,number:formatNumber(seq,period,fmt)}}
-function integrity(){const errs=[],seen=new Map();for(const x of list){if(x.deleted)continue;const k=(x.numberFormat||'month')+'|'+x.number;if(seen.has(k))errs.push(`Number ${x.number} on registris kaks korda (${seen.get(k).client.name} ja ${x.client.name}). Uusi arveid ei koostata enne, kui see on lahendatud.`);else seen.set(k,x)}return errs}
+// Hoursist toodud arved (admin) kuuluvad Hoursi registrisse: nende numbreid kontrollib Hours.
+const admin=()=>!!settings.hoursAdmin;
+function integrity(){const errs=[],seen=new Map();for(const x of list){if(x.deleted||x.fromHours)continue;const k=(x.numberFormat||'month')+'|'+x.number;if(seen.has(k))errs.push(`Number ${x.number} on registris kaks korda (${seen.get(k).client.name} ja ${x.client.name}). Uusi arveid ei koostata enne, kui see on lahendatud.`);else seen.set(k,x)}return errs}
 
 /* ---------- summa sõnadega ---------- */
 const ONES=['','üks','kaks','kolm','neli','viis','kuus','seitse','kaheksa','üheksa'];
@@ -149,13 +151,13 @@ function build(extra={}){const c=computed(),n=nextNumber(draft.date),now=new Dat
   client:{name:draft.client.name.trim(),code:draft.client.code.trim(),vatNo:draft.client.vatNo.trim(),lines:[draft.client.line1,draft.client.line2].map(s=>s.trim()).filter(Boolean),email:draft.client.email.trim()},
   rows:c.rows,vatRate:c.vatRate,net:c.net,vat:c.vat,gross:c.gross,words:amountWords(c.gross,draft.lang),hoursProject:draft.hoursProject||'',hoursNet:draft.hoursProject?c.net:undefined,
   seller:S,createdAt:now,_u:Date.now(),sent:[],...extra}}
-async function issue(){msg='';const errs=problems();if(errs.length){msg=errs.map(escH).join('<br>');render();return}
+async function issue(){msg='';if(admin()){alertBox('Sinu arved teeb Hours (Macis), et numeratsioon oleks ühes kohas.');return}const errs=problems();if(errs.length){msg=errs.map(escH).join('<br>');render();return}
  const x=build();if(!confirm(`Koostan arve ${x.number} (${x.client.name}, ${eurUi(x.gross)}).\n\nArve numbrit ei saa hiljem muuta ega uuesti kasutada. Jätkan?`))return;
  try{if(window.daybillReserveNumber)await window.daybillReserveNumber(x)}catch(e){alertBox(e.message||String(e));return}
  list.push(x);saveList([x]);const pid=x.hoursProject;draft=fresh();tab='list';msg=`Arve ${escH(x.number)} on koostatud ja salvestatud. PDF laaditi alla.`;await deliverPdf(x);render();try{if(pid&&typeof render==='function'&&window.hoursInvoicesChanged)window.hoursInvoicesChanged()}catch(e){}}
 function preview(){const c=computed();if(!c.rows.length){msg='Lisa vähemalt üks rida.';render();return}const x=build({number:(draft.lang==='en'?'DRAFT ':'EELVAADE ')+nextNumber(draft.date).number});deliverPdf(x)}
 function update(x,changes){Object.assign(x,changes,{_u:Date.now(),updatedAt:new Date().toISOString()});saveList([x]);render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}
-function creditNote(x){if(credited(x)){alertBox('See arve on juba täielikult krediteeritud.');return}if(!confirm(`Koostan kreeditarve arvele ${x.number}. See tühistab arve summa (${eurUi(x.gross)}). Jätkan?`))return;
+function creditNote(x){if(admin()||x.fromHours){alertBox('Kreeditarve tee Hoursis (Macis), kus on sinu arvete register.');return}if(credited(x)){alertBox('See arve on juba täielikult krediteeritud.');return}if(!confirm(`Koostan kreeditarve arvele ${x.number}. See tühistab arve summa (${eurUi(x.gross)}). Jätkan?`))return;
  const saved={...draft};draft={...fresh(),date:isoToday()<x.date?x.date:isoToday(),lang:x.lang,vat:x.vatRate,client:{name:x.client.name,code:x.client.code||'',vatNo:x.client.vatNo||'',line1:x.client.lines[0]||'',line2:x.client.lines[1]||'',email:x.client.email||''},rows:x.rows.map(r=>({...r,price:-r.price}))};
  if(!sellerReady()){draft=saved;alertBox('Täida enne „Seaded” all oma andmed.');return}
  const c=build({credit:true,creditFor:x.id,creditNumber:x.number,days:0,due:draft.date});c.rows=x.rows.map(r=>({...r,price:-r.price,total:-r.total}));c.net=-x.net;c.vat=-x.vat;c.gross=-x.gross;c.words=amountWords(c.gross,c.lang);c.hoursProject=x.hoursProject||'';c.hoursNet=undefined;draft=saved;
@@ -165,15 +167,17 @@ function alertBox(t){alert(t)}
 /* ---------- vaade ---------- */
 let root=null;
 function mount(){root=document.createElement('section');root.id='invView';root.className='db-view hidden';document.querySelector('main').append(root)}
-function render(){if(!root)return;const c=computed(),errs=integrity();const open=live().filter(x=>!x.credit&&!x.paidAt&&!credited(x)),over=open.filter(x=>x.due<isoToday());
+function render(){if(!root)return;const c=computed(),errs=integrity();const open=live().filter(x=>!x.credit&&!x.paidAt&&!x.paid&&!credited(x)),over=open.filter(x=>x.due<isoToday());
  root.innerHTML=`<div class="row top"><h1>Arve</h1></div>
  <div class="inv-strip">${open.length?`Laekumata ${open.length} arvet · ${eurUi(open.reduce((s,x)=>s+x.gross,0))}${over.length?` · <strong>üle tähtaja ${over.length}</strong>`:''}`:'Kõik arved on makstud.'}</div>
  ${errs.length?`<div class="inv-warn"><strong>Registris on viga.</strong><br>${errs.map(escH).join('<br>')}</div>`:''}
  ${msg?`<div class="inv-warn" role="status">${msg}</div>`:''}
  <nav class="actions inv-tabs"><button data-tab="new" class="${tab==='new'?'primary':''}">Uus arve</button><button data-tab="list" class="${tab==='list'?'primary':''}">Arhiiv ja laekumised</button><button data-tab="sum" class="${tab==='sum'?'primary':''}">Kokkuvõte</button><button data-tab="tpl" class="${tab==='tpl'?'primary':''}">Arvepõhi</button></nav>
- ${tab==='new'?newHtml(c):tab==='list'?listHtml():'<div id="invExtra"></div>'}`;
+ ${tab==='new'&&admin()?adminHtml():tab==='new'?newHtml(c):tab==='list'?listHtml():'<div id="invExtra"></div>'}`;
  root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;msg='';render()});
- if(tab==='new')bindNew();else if(tab==='list')bindList();else try{window.daybillInvExtra(tab,$i('invExtra'))}catch(e){console.error(e)}}
+ if(tab==='new'&&admin()){const b=$i('invGoList');if(b)b.onclick=()=>{tab='list';msg='';render()}}else if(tab==='new')bindNew();else if(tab==='list')bindList();else try{window.daybillInvExtra(tab,$i('invExtra'))}catch(e){console.error(e)}}
+function adminHtml(){const n=live().filter(x=>x.fromHours).length;
+ return `<div class="section" style="padding-top:0"><h2>Arved teed Hoursis</h2><p class="help">Sinu konto on ühendatud sinu raamatupidamise programmiga Hours. Arve koostad Macis Hoursis: seal on arvete register, Dropboxi kaust ja raamatupidamine. Nii on arvete numeratsioon alati ühes kohas ja topeltarveid ei teki.</p><p class="help">Daybillis lõpetatud tööpäevad jõuavad Hoursi ise, kui Hours on Macis lahti. Hoursi arved ja nende laekumised tulevad siia tagasi (${n} arvet).</p><div class="actions"><button type="button" class="primary" id="invGoList">Vaata arveid</button></div></div>`}
 function newHtml(c){const n=nextNumber(draft.date),projects=hoursProjects().filter(p=>!p.archived||p.id===draft.hoursProject);
  return `${sellerReady()?'':`<div class="inv-warn">Enne esimest arvet täida oma arvepõhi: logo, nimi, aadress ja IBAN. Seda teed ainult ühe korra. <button type="button" id="invGoSettings">Täida arvepõhi</button></div>`}
  <div class="section" style="padding-top:0"><div class="grid">
@@ -220,7 +224,7 @@ function listHtml(){const years=[...new Set(live().map(x=>x.date.slice(0,4)).con
  return `<div class="inv-filter"><select id="invYear"><option value="all">Kõik aastad</option>${years.map(y=>`<option${filter.year===y?' selected':''}>${y}</option>`).join('')}</select>
  <select id="invStatus">${[['all','Kõik'],['unpaid','Laekumata'],['overdue','Üle tähtaja'],['paid','Makstud'],['credited','Krediteeritud'],['credit','Kreeditarved']].map(([v,t])=>`<option value="${v}"${filter.status===v?' selected':''}>${t}</option>`).join('')}</select>
  <input id="invQ" type="search" placeholder="Otsi klienti, numbrit või kirjeldust" value="${escH(filter.q)}" style="flex:1;min-width:180px"></div>
- ${rows.length?`<div class="table"><table><thead><tr><th>Number</th><th>Kuupäev</th><th>Klient</th><th>Summa</th><th>Olek</th><th></th></tr></thead><tbody>${rows.map(x=>{const [st,k]=status(x);return `<tr class="${k==='paid'||k==='credited'?'paid':''}"><td>${escH(x.number)}</td><td>${dmy(x.date)}</td><td>${escH(x.client.name)}</td><td>${eurUi(x.gross)}</td><td class="inv-status">${k==='overdue'?'<strong>'+st+'</strong>':st}${x.paidAt?' '+dmy(x.paidAt):''}${x.sent&&x.sent.length?'<br>saadetud '+dmy(x.sent.at(-1).slice(0,10)):''}</td><td class="inv-actions"><button data-pdf="${escH(x.id)}">PDF</button> <button data-share="${escH(x.id)}">Saada</button>${x.credit||credited(x)?'':` <button data-paid="${escH(x.id)}">${x.paidAt?'Maksmata':'Makstud'}</button> <button data-credit="${escH(x.id)}">Kreeditarve</button>`} <button data-copy="${escH(x.id)}">Kopeeri</button></td></tr>`}).join('')}</tbody></table></div><p class="help">Kokku ${rows.length} arvet · ${eurUi(sum)} (krediteeritud arveteta).</p>`:'<div class="empty">Arveid pole.</div>'}`}
+ ${rows.length?`<div class="table"><table><thead><tr><th>Number</th><th>Kuupäev</th><th>Klient</th><th>Summa</th><th>Olek</th><th></th></tr></thead><tbody>${rows.map(x=>{const [st,k]=status(x);return `<tr class="${k==='paid'||k==='credited'?'paid':''}"><td>${escH(x.number)}</td><td>${dmy(x.date)}</td><td>${escH(x.client.name)}</td><td>${eurUi(x.gross)}</td><td class="inv-status">${k==='overdue'?'<strong>'+st+'</strong>':st}${x.paidAt&&x.paidAt!==true?' '+dmy(x.paidAt):''}${x.sent&&x.sent.length?'<br>saadetud '+dmy(x.sent.at(-1).slice(0,10)):''}</td><td class="inv-actions">${x.fromHours?'<span class="help">Hoursis · PDF on Dropboxis</span>':`<button data-pdf="${escH(x.id)}">PDF</button> <button data-share="${escH(x.id)}">Saada</button>${x.credit||credited(x)?'':` <button data-paid="${escH(x.id)}">${x.paidAt?'Maksmata':'Makstud'}</button> <button data-credit="${escH(x.id)}">Kreeditarve</button>`} <button data-copy="${escH(x.id)}">Kopeeri</button>`}</td></tr>`}).join('')}</tbody></table></div><p class="help">Kokku ${rows.length} arvet · ${eurUi(sum)} (krediteeritud arveteta).</p>`:'<div class="empty">Arveid pole.</div>'}`}
 function bindList(){$i('invYear').onchange=e=>{filter.year=e.target.value;render()};$i('invStatus').onchange=e=>{filter.status=e.target.value;render()};$i('invQ').oninput=e=>{filter.q=e.target.value;const pos=e.target.selectionStart;render();const el=$i('invQ');el.focus();el.setSelectionRange(pos,pos)};
  const get=id=>list.find(x=>x.id===id);
  root.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>deliverPdf(get(b.dataset.pdf)));

@@ -1438,7 +1438,7 @@ const EN=/*EN-START*/{
 "Koostan kreeditarve arvele {0}. See tühistab arve summa ({1}). Jätkan?":"I will create a credit note for invoice {0}. It cancels the invoice amount ({1}). Continue?",
 "Täida enne „Seaded” all oma andmed.":"First fill in your details under “Settings”.",
 "Kreeditarve {0} on koostatud. Arve {1} on nüüd krediteeritud.":"Credit note {0} has been created. Invoice {1} is now credited.",
-"üle tähtaja {0}":"overdue {0}",
+"üle tähtaja {0}":"{0} overdue",
 "Kõik arved on makstud.":"All invoices are paid.",
 "Registris on viga.":"There is an error in the register.",
 "See on eraldi lisaarve samale projektile":"This is a separate extra invoice for the same project",
@@ -1552,7 +1552,22 @@ const EN=/*EN-START*/{
 "Hele":"Light",
 "Tume":"Dark",
 "Välimus: {0}":"Appearance: {0}",
-"„Automaatne” järgib telefoni või arvuti seadet: päeval hele, öösel tume.":"“Automatic” follows your phone or computer setting: light by day, dark at night."
+"„Automaatne” järgib telefoni või arvuti seadet: päeval hele, öösel tume.":"“Automatic” follows your phone or computer setting: light by day, dark at night.",
+"Vaikimisi on Daybill tume. Valik jääb selles seadmes meelde.":"Daybill is dark by default. Your choice is remembered on this device.",
+"Sinu arved teeb Hours (Macis), et numeratsioon oleks ühes kohas.":"Your invoices are made in Hours (on the Mac) so numbering stays in one place.",
+"Kreeditarve tee Hoursis (Macis), kus on sinu arvete register.":"Make the credit note in Hours (on the Mac), where your invoice register is.",
+"Arved teed Hoursis":"You make invoices in Hours",
+"Sinu konto on ühendatud sinu raamatupidamise programmiga Hours. Arve koostad Macis Hoursis: seal on arvete register, Dropboxi kaust ja raamatupidamine. Nii on arvete numeratsioon alati ühes kohas ja topeltarveid ei teki.":"Your account is connected to your bookkeeping program Hours. You make invoices in Hours on the Mac: that is where the invoice register, the Dropbox folder and the bookkeeping are. This keeps invoice numbering in one place, so duplicate invoices cannot happen.",
+"Daybillis lõpetatud tööpäevad jõuavad Hoursi ise, kui Hours on Macis lahti. Hoursi arved ja nende laekumised tulevad siia tagasi ({0} arvet).":"Work days finished in Daybill reach Hours automatically while Hours is open on the Mac. Hours invoices and their payments come back here ({0} invoices).",
+"Hoursis · PDF on Dropboxis":"In Hours · PDF is in Dropbox",
+"Vaata arveid":"View invoices",
+"Laekumata {0} arvet":"{0} unpaid invoices",
+"saadetud {0}":"sent {0}",
+"Makstud {0}":"Paid {0}",
+"Sisse logitud: {0}. Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":"Signed in: {0}. Sign in with the same account on your phone and computer: projects, hours and invoices are on both.",
+"Sisse logitud:":"Signed in:",
+". Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":". Sign in with the same account on your phone and computer: projects, hours and invoices are on both.",
+"Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":"Sign in with the same account on your phone and computer: projects, hours and invoices are on both."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

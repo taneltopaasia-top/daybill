@@ -13,7 +13,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .db-sync{font-size:11px;white-space:nowrap}
 main{margin-top:34px}
 .db-view.hidden{display:none!important}
-@media(max-width:650px){.db-bar-in{padding:8px 12px;gap:8px;flex-wrap:wrap}.db-brand{font-size:17px}.db-nav{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.db-bar #langSwitch{order:0}.db-gear{order:0;padding:5px 10px;min-height:32px;font-size:13px}#sumView .inv-total{grid-template-columns:1fr 1fr}.db-nav button{padding:7px 4px;font-size:13px}.db-sync{display:none}main{margin-top:20px}}
+@media(max-width:650px){.db-bar-in{padding:8px 12px;gap:8px;flex-wrap:wrap}.db-brand{font-size:17px}.db-nav{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.db-bar #langSwitch{order:0}.db-gear{order:0;padding:5px 10px;min-height:32px;font-size:13px}#sumView .inv-total{grid-template-columns:1fr 1fr}.db-nav button{padding:7px 4px;font-size:13px;white-space:nowrap}.db-sync{display:none}main{margin-top:20px}}
 
 /* Kell (telefon) */
 .clock{max-width:460px;margin:0 auto;text-align:center}
@@ -81,7 +81,8 @@ main{margin-top:34px}
 @media(max-width:650px){.db-install-in{padding:10px 12px}}
 
 /* Hele / tume */
-.db-theme{order:2;min-height:30px;padding:3px 9px;font-size:15px;line-height:1}
+#themeSwitch{order:2;display:flex}#themeSwitch button{min-height:0;padding:4px 7px;font-size:11px;letter-spacing:.5px}#themeSwitch button+button{border-left:0}
 .tpl-logo img{background:#fff}
-@media(max-width:650px){.db-theme{order:0;min-height:30px}}
+@media(max-width:650px){#themeSwitch{order:0}#themeSwitch button{min-height:30px}}
 @media(max-width:650px){.db-bar #langSwitch{order:0}.db-bar #langSwitch button{min-height:30px}}
+.db-nav button{white-space:nowrap}

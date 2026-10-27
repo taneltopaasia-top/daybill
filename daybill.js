@@ -182,7 +182,7 @@ function renderSettings(){const lang=(window.HoursI18n&&window.HoursI18n.lang)||
  setView.innerHTML=`<div class="row top"><h1>Seaded</h1></div>
  
  <div class="section"><h2>Keel</h2><div class="actions"><button type="button" data-lang="et" class="${lang==='et'?'primary':''}">Eesti</button><button type="button" data-lang="en" class="${lang==='en'?'primary':''}">English</button></div></div>
- <div class="section"><h2>Välimus</h2><div class="actions">${[['auto','Automaatne'],['light','Hele'],['dark','Tume']].map(([k,l])=>`<button type="button" data-theme-set="${k}" class="${theme()===k?'primary':''}">${l}</button>`).join('')}</div><p class="help">„Automaatne” järgib telefoni või arvuti seadet: päeval hele, öösel tume.</p></div>
+ <div class="section"><h2>Välimus</h2><div class="actions">${[['dark','Tume'],['light','Hele']].map(([k,l])=>`<button type="button" data-theme-set="${k}" class="${theme()===k?'primary':''}">${l}</button>`).join('')}</div><p class="help">Vaikimisi on Daybill tume. Valik jääb selles seadmes meelde.</p></div>
  <div class="section"><h2>Sünkroonimine telefoni ja arvuti vahel</h2><div id="syncBox"></div></div>
  <div class="section" id="storageBox"><h2>Mälu ja piirid</h2>${storageHtml()}</div>
  <div class="section" id="backupBox"><h2>Varukoopia</h2></div>
@@ -235,11 +235,13 @@ else if(ios)showInstall(T_('Lisa Daybill oma avakuvale: ava see link Safaris, va
 else if(macSafari)showInstall('Lisa Daybill Docki: Safari menüü Fail → „Lisa Docki”.');
 
 /* ---------- hele / tume ---------- */
-function theme(){try{const t=localStorage.getItem('daybill.theme');return t==='dark'||t==='light'?t:'auto'}catch(e){return 'auto'}}
-function setTheme(t){try{if(t==='auto')localStorage.removeItem('daybill.theme');else localStorage.setItem('daybill.theme',t)}catch(e){}if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;markTheme()}
-const themeBtn=document.createElement('button');themeBtn.type='button';themeBtn.className='db-theme';
-function markTheme(){const t=theme();themeBtn.textContent=t==='dark'?'☾':t==='light'?'☀':'◐';themeBtn.title=t==='dark'?'Tume':t==='light'?'Hele':'Automaatne';themeBtn.setAttribute('aria-label','Välimus: '+themeBtn.title)}
-themeBtn.onclick=()=>{const t=theme();setTheme(t==='auto'?'dark':t==='dark'?'light':'auto');if(view==='settings')renderSettings()};
+// Kaks valikut: tume (vaikimisi) ja hele.
+function theme(){try{return localStorage.getItem('daybill.theme')==='light'?'light':'dark'}catch(e){return 'dark'}}
+function setTheme(t){t=t==='light'?'light':'dark';try{localStorage.setItem('daybill.theme',t)}catch(e){}document.documentElement.dataset.theme=t;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='light'?'#ffffff':'#121212';markTheme()}
+const themeBtn=document.createElement('div');themeBtn.id='themeSwitch';themeBtn.setAttribute('role','group');themeBtn.setAttribute('aria-label','Välimus');
+themeBtn.innerHTML='<button type="button" data-t="light">Hele</button><button type="button" data-t="dark">Tume</button>';
+function markTheme(){const t=theme();themeBtn.querySelectorAll('button').forEach(b=>{b.classList.toggle('primary',b.dataset.t===t);b.setAttribute('aria-pressed',b.dataset.t===t)})}
+themeBtn.querySelectorAll('button').forEach(b=>b.onclick=()=>{setTheme(b.dataset.t);if(view==='settings')renderSettings()});
 bar.querySelector('.db-bar-in').insertBefore(themeBtn,bar.querySelector('.db-gear'));markTheme();
 
 /* ---------- käivitus ---------- */

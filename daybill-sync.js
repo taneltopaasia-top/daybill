@@ -22,20 +22,24 @@ const canon=v=>Array.isArray(v)?v.map(canon):v&&typeof v==='object'?Object.fromE
 
 async function load(){const V='10.12.2',base=`https://www.gstatic.com/firebasejs/${V}/`;
  const [app,auth,fs]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
- const a=app.initializeApp(cfg);let db;try{db=fs.initializeFirestore(a,{localCache:fs.persistentLocalCache({tabManager:fs.persistentMultipleTabManager()})})}catch(e){db=fs.getFirestore(a)}
+ const a=app.initializeApp(cfg);// Mälupõhine vahemälu: Daybill hoiab andmeid ise selles seadmes. Nii ei saa teine (taustal külmunud) vahekaart ühendust kinni hoida.
+ let db;try{db=fs.initializeFirestore(a,{localCache:fs.memoryLocalCache()})}catch(e){db=fs.getFirestore(a)}
  return {auth:auth.getAuth(a),A:auth,db,F:fs}}
 
 /* ---------- saatmine ---------- */
 function projectsChanged(){clearTimeout(pushTimer);pushTimer=setTimeout(pushProjects,4000)}
-async function pushProjects(){if(!user)return;const {F,db}=fb;const batch=F.writeBatch(db);let n=0;
+// „pushed” märgitakse alles siis, kui pilv on kirjutamise kinnitanud: katkenud saatmine korratakse järgmisel avamisel.
+let pushing=false;
+async function pushProjects(){if(!user)return;if(pushing){projectsChanged();return}const {F,db}=fb;const batch=F.writeBatch(db);let n=0;const done=[];
  const full=usage()>CAP;let blocked=0;
  for(const p of state.projects){const f=hash(p.deleted?'deleted':fp(p));if(pushed.get('p:'+p.id)===f)continue;
   if(full&&!p.deleted){blocked++;continue}
-  p._u=Date.now();pushed.set('p:'+p.id,f);batch.set(F.doc(db,'users',user.uid,'projects',p.id),p.deleted?{deleted:true,u:p._u}:{data:JSON.stringify(p),u:p._u});n++;if(n>=400)break}
+  p._u=Date.now();done.push(['p:'+p.id,f]);batch.set(F.doc(db,'users',user.uid,'projects',p.id),p.deleted?{deleted:true,u:p._u}:{data:JSON.stringify(p),u:p._u});n++;if(n>=400)break}
  if(blocked)setStatus('Pilve mälu on täis: uusi muudatusi ei sünkita. Ava Seaded → Mälu ja kustuta vanu projekte.');
- if(!n)return;savePushed();try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
- try{await batch.commit();setStatus('Sünkroonitud · '+user.email)}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}}
-async function pushInvoice(x){if(!user)return;const {F,db}=fb;pushed.set('i:'+x.id,hash(x.deleted?'deleted':fp(x)));savePushed();try{await F.setDoc(F.doc(db,'users',user.uid,'invoices',x.id),x.deleted?{deleted:true,u:x._u||Date.now()}:{data:JSON.stringify(x),u:x._u||Date.now()})}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}}
+ if(!n)return;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
+ pushing=true;try{await batch.commit();for(const [k,f] of done)pushed.set(k,f);savePushed();setStatus('Sünkroonitud · '+user.email)}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}finally{pushing=false}
+ if(n>=400)projectsChanged()}
+async function pushInvoice(x){if(!user)return;const {F,db}=fb;const h=hash(x.deleted?'deleted':fp(x));try{await F.setDoc(F.doc(db,'users',user.uid,'invoices',x.id),x.deleted?{deleted:true,u:x._u||Date.now()}:{data:JSON.stringify(x),u:x._u||Date.now()});pushed.set('i:'+x.id,h);savePushed()}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}}
 async function pushSettings(s){if(!user)return;const {F,db}=fb;try{await F.setDoc(F.doc(db,'users',user.uid,'meta','settings'),{data:JSON.stringify(s),u:s._u||Date.now()})}catch(e){}}
 
 /* ---------- arve numbri broneerimine ---------- */
@@ -51,6 +55,9 @@ function applyProjects(docs){if(editingNow()){pendingRemote=docs;return}let chan
  savePushed();if(changed){if(!state.projects.some(p=>p.id===state.selected))state.selected=null;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}try{window.daybillRefresh&&window.daybillRefresh()}catch(e){}}}
 document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRemote&&!editingNow()){const d=pendingRemote;pendingRemote=null;applyProjects(d)}},0));
 
+// Kui kuulaja katkeb (nt kohe pärast konto loomist), proovitakse paari sekundi pärast uuesti.
+let retryTimer=null,retries=0;
+function retry(u){setStatus('Sünk ootab ühendust');clearTimeout(retryTimer);if(retries>20)return;retryTimer=setTimeout(()=>{retries++;if(user&&user.uid===u.uid)start(u)},Math.min(60000,3000*(retries+1)))}
 async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatus('Andmed on selles seadmes · logi seadetes sisse, et sünkida');return}
  const {F,db}=fb;setStatus('Sünkroonin…');
  loadPushed();const since=lastSync(),first=!since;
@@ -60,13 +67,13 @@ async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatu
  unsub.push(F.onSnapshot(q('projects'),snap=>{const docs=snap.docChanges().filter(c=>c.type!=='removed'&&!c.doc.metadata.hasPendingWrites).map(c=>({...c.doc.data(),id:c.doc.id}));
   if(docs.length)applyProjects(docs);
   if(firstProjects&&!snap.metadata.fromCache){firstProjects=false;if(first){const remote=new Set(snap.docs.map(d=>d.id));for(const p of state.projects)if(!remote.has(p.id))pushed.delete('p:'+p.id)}projectsChanged()}
-  setStatus(snap.metadata.fromCache?'Ilma internetita · muudatused saadetakse hiljem':'Sünkroonitud · '+u.email)},()=>setStatus('Sünk ootab ühendust')));
+  setStatus(snap.metadata.fromCache?'Ilma internetita · muudatused saadetakse hiljem':'Sünkroonitud · '+u.email)},()=>retry(u)));
  unsub.push(F.onSnapshot(q('invoices'),snap=>{const T=window.TraageldusInvoices,ch=snap.docChanges().filter(c=>c.type!=='removed'&&!c.doc.metadata.hasPendingWrites);
   const docs=[];for(const c of ch){const d=c.doc.data();seen(d.u||0);if(d.deleted){T.receive([{id:c.doc.id,deleted:true,_u:d.u}]);continue}try{docs.push(JSON.parse(d.data))}catch(e){}}if(docs.length)T.receive(docs);
   if(firstInvoices&&!snap.metadata.fromCache){firstInvoices=false;const remote=new Set(snap.docs.map(d=>d.id));for(const x of T.all())if((first&&!remote.has(x.id))||pushed.get('i:'+x.id)!==hash(x.deleted?'deleted':fp(x)))pushInvoice(x);
    // olemasolevate numbrite register, et teine seade ei saaks neid kasutada
    if(first){const ref=F.doc(db,'users',u.uid,'meta','numbers'),used={};for(const x of T.all()){const k=(x.numberFormat||'month')+'|'+x.period;(used[k]??=[]).push(x.seq)}
-    if(Object.keys(used).length)F.runTransaction(db,async t=>{const s=await t.get(ref);const cur=s.exists()?s.data():{};const next={};for(const [k,v] of Object.entries(used))next[k]=[...new Set([...(cur[k]||[]),...v])];t.set(ref,next,{merge:true})}).catch(()=>{})}}}));
+    if(Object.keys(used).length)F.runTransaction(db,async t=>{const s=await t.get(ref);const cur=s.exists()?s.data():{};const next={};for(const [k,v] of Object.entries(used))next[k]=[...new Set([...(cur[k]||[]),...v])];t.set(ref,next,{merge:true})}).catch(()=>{})}}},()=>retry(u)));
  unsub.push(F.onSnapshot(F.doc(db,'users',u.uid,'meta','settings'),s=>{if(s.metadata.hasPendingWrites)return;const l=window.DaybillSettings.get();if(!s.exists()){if(l._u)pushSettings(l);return}try{const r=JSON.parse(s.data().data);if((r._u||0)>(l._u||0))window.DaybillSettings.save(r,true);else if((l._u||0)>(r._u||0))pushSettings(l)}catch(e){}}))}
 
 /* ---------- konto (seadetes) ---------- */
