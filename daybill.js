@@ -41,7 +41,9 @@ bar.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view
 /* ---------- kell ---------- */
 let clockProject=null,tick=null,lastWrap=null;
 try{clockProject=localStorage.getItem('daybill.clockProject')}catch(e){}
-const active=()=>state.projects.filter(x=>!x.deleted&&!x.kind&&!x.archived&&!x.fromInvoice);
+// Viimati kasutatud projekt on eespool (kell valib selle ise).
+const lastAct=x=>(x.clock?'9':'')+(x.entries||[]).reduce((m,e)=>{const d=(e.endDate||e.date||'')+' '+(e.end||'');return d>m?d:m},'');
+const active=()=>state.projects.filter(x=>!x.deleted&&!x.kind&&!x.archived&&!x.fromInvoice).sort((a,b)=>lastAct(b).localeCompare(lastAct(a)));
 function cp(){return active().find(x=>x.id===clockProject)||active().find(x=>x.clock)||active()[0]}
 const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
