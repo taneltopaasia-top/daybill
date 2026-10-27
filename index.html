@@ -253,6 +253,8 @@ function invoicedLabel(proj){const list=projectInvoices(proj).filter(x=>!x.fully
 function renderInvoiced(){const proj=p(),el=$('invoicedNote');if(!proj){el.hidden=true;return}const list=projectInvoices(proj);if(!list.length){el.hidden=true;el.innerHTML='';return}
  const open=list.filter(x=>!x.fullyCredited),billed=cent(open.reduce((s,x)=>s+x.hoursNet,0)),now=projectTotals(proj).net;
  el.hidden=false;el.innerHTML=list.map(x=>`<strong>Arve ${esc(x.number)}</strong> · ${esc(x.date.split('-').reverse().join('.'))} · ${money(x.gross)} · ${esc(x.status)}`).join('<br>')+(open.length&&!invoiceOnly(proj)&&Math.abs(billed-now)>0.005?`<br><strong>Pärast arvet on projekti summa muutunud:</strong> arvel ${money(billed)}, praegu ${money(now)} ilma KM-ta.`:'')}
+// Daybill: projekt kustub ainult siis, kui arve on päriselt kustutatud (sünk võib arveid tuua hiljem kui projekte).
+const invoiceGone=(id,list)=>{try{const all=window.TraageldusInvoices.all;if(all)return all().some(x=>x.id===id&&x.deleted)}catch(e){}return !list.some(x=>x.id===id)};
 // Otse tehtud arve ilma projektita: eelvaatesse tekib selle arve projekt. Id on 'inv'+arve id, nii et projekt ei teki kunagi topelt (ka mitmes seadmes).
 const AUTO_INVOICE_FROM='2026-10-20';
 function invoiceProjects(){if(window.HOURS_NATIVE&&!cloudReady)return false;let list=[];try{list=window.TraageldusInvoices?.list?.()||[]}catch(e){}if(!list.length)return false;let changed=false;
@@ -261,7 +263,7 @@ function invoiceProjects(){if(window.HOURS_NATIVE&&!cloudReady)return false;let 
   const n=project(first||x.client.name);n.id=pid;n.vat=Number(x.vatRate)||24;n.fromInvoice=x.id;n.draft={date:x.date,endDate:x.date,start:'',end:''};
   n.bookkeeper={companyName:x.client.name,companyCode:x.client.code||'',companyAddress:(x.client.lines||[]).filter(l=>!/^Registrikood/i.test(l)).join(', ')};state.projects.push(n);changed=true}
  // Kui arve number vabastati, kaob ka selle järgi tehtud tühi projekt.
- for(const q of state.projects){if(q.fromInvoice&&!q.deleted&&!q.entries.length&&!(q.expenses||[]).length&&!list.some(x=>x.id===q.fromInvoice)){q.deleted=true;if(state.selected===q.id)state.selected=visibleProjects()[0]?.id||null;changed=true}}
+ for(const q of state.projects){if(q.fromInvoice&&!q.deleted&&!q.entries.length&&!(q.expenses||[]).length&&invoiceGone(q.fromInvoice,list)){q.deleted=true;if(state.selected===q.id)state.selected=visibleProjects()[0]?.id||null;changed=true}}
  if(changed)save();return changed}
 window.hoursInvoicesChanged=()=>{invoiceProjects();if(document.activeElement?.closest?.('#projectEditor'))renderInvoiced();else if(p())render();else{renderProjectList();renderInvoiced()}};
 
