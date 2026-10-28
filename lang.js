@@ -1726,7 +1726,10 @@ const EN=/*EN-START*/{
 "Sisesta enne projekti valikutes amet.":"First enter your role in the project options.",
 "{0} kattub olemasoleva tööpäevaga.":"{0} overlaps an existing workday.",
 "Produtsent saab tööaja ja kulude ülevaate (PDF).":"The producer gets a working time and cost overview (PDF).",
-"Salvesta tööaja ja kulude ülevaade (PDF)":"Save working time and cost overview (PDF)"
+"Salvesta tööaja ja kulude ülevaade (PDF)":"Save working time and cost overview (PDF)",
+"Projektil on fikseeritud hind, nii et see päev kogusummat ei muuda. Päev on ülevaates siiski näha.":"This project has a fixed price, so this day doesn’t change the total. It still shows in the overview.",
+"Laen…":"Loading…",
+"Sünkroonimine ei käivitunud. Kontrolli internetiühendust ja ava Daybill uuesti. Sinu andmed on selles seadmes alles.":"Sync didn’t start. Check your internet connection and open Daybill again. Your data is safe on this device."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

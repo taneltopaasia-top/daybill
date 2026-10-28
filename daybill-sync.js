@@ -82,7 +82,8 @@ async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatu
 
 /* ---------- konto (seadetes) ---------- */
 function msgOf(e){const c=e&&e.code||'';return {'auth/invalid-email':'E-post on vale.','auth/missing-password':'Kirjuta parool.','auth/weak-password':'Parool peab olema vähemalt 6 märki.','auth/email-already-in-use':'Selle e-postiga konto on juba olemas: logi sisse.','auth/invalid-credential':'E-post või parool on vale. Kui unustasid parooli, vajuta „Unustasin parooli”.','auth/wrong-password':'E-post või parool on vale. Kui unustasid parooli, vajuta „Unustasin parooli”.','auth/user-not-found':'Sellise e-postiga kontot pole: loo konto.','auth/too-many-requests':'Liiga palju katseid. Proovi mõne minuti pärast.','auth/network-request-failed':'Internet puudub.','auth/requires-recent-login':'Logi uuesti sisse ja proovi siis uuesti.'}[c]||e.message||String(e)}
-function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sünkroonimine ei käivitunud. Praegu on andmed ainult selles seadmes.</p>';return}if(!fb){el.innerHTML='<p class="help">Laen…</p>';return}
+let loadFailed=false;
+function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sünkroonimine ei käivitunud. Praegu on andmed ainult selles seadmes.</p>';return}if(!fb){el.innerHTML=loadFailed?'<p class="help">Sünkroonimine ei käivitunud. Kontrolli internetiühendust ja ava Daybill uuesti. Sinu andmed on selles seadmes alles.</p>':'<p class="help">Laen…</p>';return}
  if(user){el.innerHTML=`<p class="help">Sisse logitud: <strong>${esc(user.email)}</strong>. Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.</p><p class="help" id="syncState">${esc(status)}</p><div class="actions"><button type="button" id="syOut">Logi välja</button><button type="button" id="syDel">Kustuta konto ja pilves olevad andmed</button></div><p class="error" id="syErr" role="alert"></p>`;
   $('syOut').onclick=async()=>{await fb.A.signOut(fb.auth);renderBox(el)};
   $('syDel').onclick=async()=>{if(!confirm('Kustutan sinu konto ja kõik pilves olevad andmed (projektid, arved). Selles seadmes olevad andmed jäävad alles. Seda ei saa tagasi võtta. Jätkan?'))return;try{const {F,db}=fb,uid=user.uid;for(const c of ['projects','invoices','meta','log']){const s=await F.getDocs(F.collection(db,'users',uid,c));for(const d of s.docs)await F.deleteDoc(d.ref)}await fb.A.deleteUser(user);renderBox(el)}catch(e){$('syErr').textContent=msgOf(e)}};return}
@@ -93,5 +94,5 @@ function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sün
 window.daybillRenderSync=renderBox;
 
 if(cfg){setStatus('Ühendan…');load().then(x=>{fb=x;window.daybillSaved=projectsChanged;window.daybillInvoiceSaved=pushInvoice;window.daybillSettingsSaved=pushSettings;window.daybillLogSaved=pushLog;window.daybillReserveNumber=x2=>user?reserve(x2):Promise.resolve();
- fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>setStatus('Sünkroonimine ei käivitunud · andmed on selles seadmes alles'))}
+ fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>{loadFailed=true;setStatus('Sünkroonimine ei käivitunud · andmed on selles seadmes alles');const box=$('syncBox');if(box)renderBox(box)})}
 else setStatus('Andmed on selles seadmes');

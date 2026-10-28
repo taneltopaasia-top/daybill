@@ -159,7 +159,7 @@ td,th{border-bottom-color:var(--line)}
 .clock-face.paused .ck-state{color:var(--fg)}
 @keyframes dbRec{to{opacity:.25}}
 @media(prefers-reduced-motion:reduce){.clock-face.on .ck-state::before{animation:none}}
-.clock-time{font:500 64px "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums}
+.clock-time{font:500 68px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"zero" 0}
 .clock-face .clock-sub{font-size:14px;color:var(--muted)}
 .clock-btns{grid-template-columns:1fr 2fr}
 .clock-btns button{min-height:66px;font-size:18px;font-weight:700}
@@ -304,3 +304,5 @@ td,th{border-bottom-color:var(--line)}
 .db-ico:hover{background:var(--card);color:var(--fg)}
 .db-ico[data-code]::after{content:attr(data-code)}
 @media(max-width:650px){.db-ico{width:38px;min-width:38px;height:38px;min-height:38px}.db-bar-in{gap:6px}}
+#invView .inv-tabs button{white-space:normal;line-height:1.15;overflow:hidden}
+@media(min-width:651px){table.inv-list td:last-child{white-space:normal;min-width:190px}table.inv-list td:last-child button{margin:2px 0}}

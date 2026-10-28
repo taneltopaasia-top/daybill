@@ -334,13 +334,14 @@ function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createE
  ${edit?'':`<div><label for="ddCount">Mitu päeva järjest</label><input id="ddCount" type="text" inputmode="numeric" value="1"></div>`}</div>
  <div class="dd-pay"><label for="ddPay">Tasu päeva eest (ilma KM-ta)</label><select id="ddPay">${fd?`<option value="full">Täispäev · ${money(fd)}</option><option value="half">Pool päeva · ${money(fd/2)}</option>`:''}<option value="own">Oma summa</option></select>
  <div id="ddOwnBox"><label for="ddOwn">Summa · €</label><input id="ddOwn" type="text" inputmode="decimal" placeholder="nt 150" value="${edit&&hasPay(edit)?String(edit.pay).replace('.',','):''}"></div></div>
+ <p class="help" id="ddFixed" hidden>Projektil on fikseeritud hind, nii et see päev kogusummat ei muuda. Päev on ülevaates siiski näha.</p>
  <div class="dd-times"><p class="help dd-opt">Kellaajad (valikuline)</p><div class="dd-grid"><div><label for="ddStart">Algus</label><input id="ddStart" type="time" value="${edit?edit.start||'':''}"></div><div><label for="ddEnd">Lõpp</label><input id="ddEnd" type="time" value="${edit?edit.end||'':''}"></div></div></div>
  <div><label for="ddNote">Kirjeldus (valikuline)</label><input id="ddNote" maxlength="200" placeholder="nt valgustehnika ettevalmistus" value="${edit?escH(edit.comment||''):''}"></div>
  <p class="error" id="ddErr" role="alert"></p>
  <div class="actions"><button type="submit" class="primary" id="ddSave">${edit?'Salvesta':'Lisa'}</button><button type="button" id="ddCancel">Loobu</button></div></form>`;
  const $k=()=>dlg.querySelectorAll('[data-k]');
  const sync=()=>{$k().forEach(b=>{b.classList.toggle('primary',b.dataset.k===kind);b.setAttribute('aria-pressed',b.dataset.k===kind)});const shoot=kind==='shoot';
-  dlg.querySelector('.dd-pay').hidden=shoot;$d('ddOwnBox').hidden=shoot||$d('ddPay').value!=='own';dlg.querySelector('.dd-opt').hidden=shoot;
+  const fx=isFixed(pr);dlg.querySelector('.dd-pay').hidden=shoot||fx;$d('ddFixed').hidden=shoot||!fx;$d('ddOwnBox').hidden=shoot||$d('ddPay').value!=='own';dlg.querySelector('.dd-opt').hidden=shoot;
   $d('ddNote').placeholder=kind==='prep'?'nt valgustehnika ettevalmistus':kind==='custom'?'nt kolimine, laadimine':'nt eriti pikk võttepäev'};
  $d('ddPay').value=payMode;$k().forEach(b=>b.onclick=()=>{kind=b.dataset.k;sync()});$d('ddPay').onchange=sync;sync();
  let touched=!!edit;$d('ddDate').oninput=()=>{touched=true};const cnt=$d('ddCount');if(cnt)cnt.oninput=()=>{const n=Math.round(Number(cnt.value));if(!touched&&first&&n>=1&&n<=31)$d('ddDate').value=addDays(first,-n)};
@@ -351,7 +352,7 @@ function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createE
    const start=$d('ddStart').value,end=$d('ddEnd').value,note=$d('ddNote').value.trim();
    if(kind==='shoot'&&(!start||!end))throw Error('Võttepäeval kirjuta algus ja lõpp.');
    if((start&&!end)||(!start&&end))throw Error('Kirjuta nii algus kui lõpp või jäta mõlemad tühjaks.');
-   let pay=null;if(kind!=='shoot'){const m=$d('ddPay').value;pay=m==='full'?fd:m==='half'?Math.round(fd*50)/100:Number(String($d('ddOwn').value).replace(/\s/g,'').replace(',','.'));if(!(pay>=0)||!Number.isFinite(pay)||String($d('ddOwn').value).trim()===''&&m==='own')throw Error('Kirjuta summa eurodes, näiteks 150.');}
+   let pay=null;if(kind!=='shoot'&&isFixed(pr))pay=0;else if(kind!=='shoot'){const m=$d('ddPay').value;pay=m==='full'?fd:m==='half'?Math.round(fd*50)/100:Number(String($d('ddOwn').value).replace(/\s/g,'').replace(',','.'));if(!(pay>=0)||!Number.isFinite(pay)||String($d('ddOwn').value).trim()===''&&m==='own')throw Error('Kirjuta summa eurodes, näiteks 150.');}
    if(kind==='shoot'&&!String(pr.job||'').trim())throw Error('Sisesta enne projekti valikutes amet.');
    const made=[];for(let i=0;i<n;i++){const d=addDays(date,i);const endDate=start&&end&&end<=start?addDays(d,1):d;
     const e={id:edit?edit.id:Date.now().toString(36)+Math.random().toString(36).slice(2),date:d,endDate,start:start||'',end:end||'',job:edit?edit.job:pr.job||'',rate:edit?edit.rate:pr.rate};
