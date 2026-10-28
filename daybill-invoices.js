@@ -31,7 +31,7 @@ loadList();
 const live=()=>list.filter(x=>!x.deleted);
 const creditsOf=x=>live().filter(c=>c.credit&&c.creditFor===x.id);
 function credited(x){return !x.credit&&creditsOf(x).reduce((s,c)=>s+c.gross,0)<=-x.gross+0.005}
-function status(x){if(x.credit)return ['Kreeditarve','credit'];if(credited(x))return ['Krediteeritud','credited'];if(x.paidAt||x.paid)return ['Makstud','paid'];if(x.due<isoToday())return ['Üle tähtaja','overdue'];return ['Laekumata','open']}
+function status(x){if(x.credit)return ['Kreeditarve','credit'];if(credited(x))return ['Krediteeritud','credited'];if(x.paidAt||x.paid)return ['Makstud','paid'];if(x.due<isoToday())return ['Üle tähtaja','overdue'];return ['Ootab makset','open']}
 function forProject(pid){if(!pid)return [];return live().filter(x=>(x.hoursProject===pid||'inv'+x.id===pid)&&!x.credit).map(x=>({id:x.id,number:x.number,date:x.date,gross:x.gross,hoursNet:Number(x.hoursNet??x.net)||0,status:status(x)[0],fullyCredited:credited(x),net:x.net,desc:String(x.rows&&x.rows[0]&&x.rows[0].desc||'')}))}
 
 /* ---------- numeratsioon: NNN/KKAA (igal kuul 001) või AAAA-NNN ---------- */
@@ -169,7 +169,7 @@ let root=null;
 function mount(){root=document.createElement('section');root.id='invView';root.className='db-view hidden';document.querySelector('main').append(root)}
 function render(){if(!root)return;const c=computed(),errs=integrity();const open=live().filter(x=>!x.credit&&!x.paidAt&&!x.paid&&!credited(x)),over=open.filter(x=>x.due<isoToday());
  root.innerHTML=`<div class="row top"><h1>Arved</h1></div>
- ${!live().length?'':`<div class="inv-strip">${open.length?`Laekumata ${open.length} arvet · ${eurUi(open.reduce((s,x)=>s+x.gross,0))}${over.length?` · <strong>üle tähtaja ${over.length}</strong>`:''}`:'Kõik arved on makstud.'}</div>`}
+ ${!live().length?'':`<div class="inv-strip">${open.length?`Ootab makset ${open.length} arvet · ${eurUi(open.reduce((s,x)=>s+x.gross,0))}${over.length?` · <strong>üle tähtaja ${over.length}</strong>`:''}`:'Kõik arved on makstud.'}</div>`}
  ${errs.length?`<div class="inv-warn"><strong>Registris on viga.</strong><br>${errs.map(escH).join('<br>')}</div>`:''}
  ${msg?`<div class="inv-warn" role="status">${msg}</div>`:''}
  <nav class="actions inv-tabs"><button data-tab="new" class="${tab==='new'?'primary':''}">Uus arve</button><button data-tab="list" class="${tab==='list'?'primary':''}">Arhiiv</button><button data-tab="sum" class="${tab==='sum'?'primary':''}">Kokkuvõte</button><button data-tab="tpl" class="${tab==='tpl'?'primary':''}">Arvepõhi</button></nav>
@@ -221,8 +221,8 @@ function refreshTotals(){const c=computed();const rows=root.querySelectorAll('.i
 function listHtml(){const years=[...new Set(live().map(x=>x.date.slice(0,4)).concat(String(new Date().getFullYear())))].sort().reverse();const q=norm(filter.q);
  const rows=live().filter(x=>(filter.year==='all'||x.date.startsWith(filter.year))&&(filter.status==='all'||status(x)[1]===filter.status||(filter.status==='unpaid'&&['open','overdue'].includes(status(x)[1])))&&(!q||norm(x.number+' '+x.client.name+' '+x.rows.map(r=>r.desc).join(' ')).includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||b.seq-a.seq);
  const sum=rows.filter(x=>!credited(x)).reduce((s,x)=>s+x.gross,0);
- return `<div class="inv-filter"><select id="invYear"><option value="all">Kõik aastad</option>${years.map(y=>`<option${filter.year===y?' selected':''}>${y}</option>`).join('')}</select>
- <select id="invStatus">${[['all','Kõik'],['unpaid','Laekumata'],['overdue','Üle tähtaja'],['paid','Makstud'],['credited','Krediteeritud'],['credit','Kreeditarved']].map(([v,t])=>`<option value="${v}"${filter.status===v?' selected':''}>${t}</option>`).join('')}</select>
+ return `<div id="dbBank"></div><div class="inv-filter"><select id="invYear"><option value="all">Kõik aastad</option>${years.map(y=>`<option${filter.year===y?' selected':''}>${y}</option>`).join('')}</select>
+ <select id="invStatus">${[['all','Kõik'],['unpaid','Ootab makset'],['overdue','Üle tähtaja'],['paid','Makstud'],['credited','Krediteeritud'],['credit','Kreeditarved']].map(([v,t])=>`<option value="${v}"${filter.status===v?' selected':''}>${t}</option>`).join('')}</select>
  <input id="invQ" type="search" placeholder="Otsi klienti, numbrit või kirjeldust" value="${escH(filter.q)}" style="flex:1;min-width:180px"></div>
  ${rows.length?`<div class="table"><table class="inv-list"><thead><tr><th>Number</th><th>Kuupäev</th><th>Klient</th><th>Summa</th><th>Olek</th><th></th></tr></thead><tbody>${rows.map(x=>{const [st,k]=status(x);return `<tr class="${k==='paid'||k==='credited'?'paid':''}"><td>${escH(x.number)}</td><td>${dmy(x.date)}</td><td>${escH(x.client.name)}</td><td>${eurUi(x.gross)}</td><td class="inv-status">${k==='overdue'?'<strong>'+st+'</strong>':st}${x.paidAt&&x.paidAt!==true?' '+dmy(x.paidAt):''}${x.sent&&x.sent.length?'<br>saadetud '+dmy(x.sent.at(-1).slice(0,10)):''}</td><td class="inv-actions">${x.fromHours?'<span class="help">Hoursis · PDF on Dropboxis</span>':`<button data-pdf="${escH(x.id)}">PDF</button> <button data-share="${escH(x.id)}">Saada</button>${x.credit||credited(x)?'':` <button data-paid="${escH(x.id)}">${x.paidAt?'Märgi maksmata':'Märgi makstuks'}</button> <button data-credit="${escH(x.id)}">Kreeditarve</button>`} <button data-copy="${escH(x.id)}">Kopeeri</button>`}</td></tr>`}).join('')}</tbody></table></div><p class="help">Kokku ${rows.length} arvet · ${eurUi(sum)} (krediteeritud arveteta).</p>`:'<div class="empty">Arveid pole.</div>'}`}
 function bindList(){$i('invYear').onchange=e=>{filter.year=e.target.value;render()};$i('invStatus').onchange=e=>{filter.status=e.target.value;render()};$i('invQ').oninput=e=>{filter.q=e.target.value;const pos=e.target.selectionStart;render();const el=$i('invQ');el.focus();el.setSelectionRange(pos,pos)};
@@ -231,7 +231,8 @@ function bindList(){$i('invYear').onchange=e=>{filter.year=e.target.value;render
  root.querySelectorAll('[data-share]').forEach(b=>b.onclick=async()=>{const x=get(b.dataset.share);const shared=navigator.canShare&&await deliverPdf(x,{share:true});if(!navigator.canShare){await deliverPdf(x);location.href=`mailto:${encodeURIComponent(x.client.email||'')}?subject=${encodeURIComponent((x.lang==='en'?'Invoice ':'Arve ')+x.number)}&body=${encodeURIComponent(shareText(x)+'\n\n'+(x.lang==='en'?'(PDF attached)':'(PDF manuses)'))}`}if(shared!==false)update(x,{sent:[...(x.sent||[]),new Date().toISOString()]})});
  root.querySelectorAll('[data-paid]').forEach(b=>b.onclick=()=>{const x=get(b.dataset.paid);if(x.paidAt){if(confirm(`Märgin arve ${x.number} maksmata?`))update(x,{paidAt:null})}else update(x,{paidAt:isoToday()})});
  root.querySelectorAll('[data-credit]').forEach(b=>b.onclick=()=>creditNote(get(b.dataset.credit)));
- root.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const x=get(b.dataset.copy);draft=fresh();draft.lang=x.lang;draft.vat=x.vatRate;fillClient(x.client);draft.rows=x.rows.map(r=>({desc:r.desc,qty:r.qty,unit:r.unit,price:Math.abs(r.price)}));tab='new';msg=`Kopeeritud arvest ${escH(x.number)}. Kontrolli read ja kuupäev üle.`;render();window.scrollTo(0,0)})}
+ root.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{const x=get(b.dataset.copy);draft=fresh();draft.lang=x.lang;draft.vat=x.vatRate;fillClient(x.client);draft.rows=x.rows.map(r=>({desc:r.desc,qty:r.qty,unit:r.unit,price:Math.abs(r.price)}));tab='new';msg=`Kopeeritud arvest ${escH(x.number)}. Kontrolli read ja kuupäev üle.`;render();window.scrollTo(0,0)});
+ try{window.daybillBank&&window.daybillBank($i('dbBank'))}catch(e){console.error(e)}}
 
 /* ---------- vaadete vahetus (Daybilli riba kutsub) ---------- */
 function show(view){try{window.daybillShow&&window.daybillShow(view==='inv'||view===true?'inv':view||'hours')}catch(e){}}
@@ -243,7 +244,7 @@ function purgeable(){const t=isoToday();return live().filter(x=>keepUntil(x)<=t)
 function purge(ids){const set=new Set(ids),ok=new Set(purgeable().map(x=>x.id)),ch=[];list=list.map(x=>{if(set.has(x.id)&&ok.has(x.id)){const t=tomb(x);ch.push(t);return t}return x});saveList(ch);render();return ch.length}
 function receive(remote){let changed=false;for(let r of remote){const i=list.findIndex(x=>x.id===r.id);if(r.deleted&&i>=0)r=tomb(list[i],r._u);if(i<0){list.push(r);changed=true}else if((r._u||0)>(list[i]._u||0)){list[i]=r;changed=true}}if(changed){try{localStorage.setItem(INV_KEY,JSON.stringify(list))}catch(e){}render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}return changed}
 
-window.TraageldusInvoices={setTab(t){tab=t;msg='';render()},purgeable,purge,keepUntil,list:()=>live().map(x=>JSON.parse(JSON.stringify(x))),all:()=>list,forProject,showView:show,fromProject,renderApproved(){},refreshProjects(){},credited,status,invoicePdf,amountWords,nextNumber,integrity,receive,render};
+window.TraageldusInvoices={setTab(t){tab=t;msg='';render()},markPaid(id,date,ref){const x=list.find(v=>v.id===id);if(!x||x.deleted||x.fromHours||x.credit||x.paidAt||x.paid||credited(x))return false;update(x,{paidAt:date||isoToday(),paidRef:ref||null});return true},purgeable,purge,keepUntil,list:()=>live().map(x=>JSON.parse(JSON.stringify(x))),all:()=>list,forProject,showView:show,fromProject,renderApproved(){},refreshProjects(){},credited,status,invoicePdf,amountWords,nextNumber,integrity,receive,render};
 window.DaybillSettings={get:()=>settings,save:saveSettings,ready:sellerReady,DEFAULT:SETTINGS_DEFAULT};
 mount();render();
 })();

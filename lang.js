@@ -1620,7 +1620,32 @@ const EN=/*EN-START*/{
 "tööl alates {0}":"working since {0}",
 "· {0}. Lisa tunnid ja kulud, saada eelvaade produtsendile (nupp „Saada produtsendile” üleval) ja märgi saadetuks.":"· {0}. Add your hours and costs, send the preview to the producer (the “Send to producer” button above) and mark it as sent.",
 "Märgi maksmata":"Mark as unpaid",
-"Märgi makstuks":"Mark as paid"
+"Märgi makstuks":"Mark as paid",
+"Fail on tühi.":"The file is empty.",
+"Seda faili ei saanud lugeda. Ekspordi internetipangast konto väljavõte CSV või XML (camt.053) failina.":"Couldn't read this file. Export your account statement from online banking as a CSV or XML (camt.053) file.",
+"Väljavõte {0} – {1}":"Statement {0} – {1}",
+"{0} laekumist":"{0} incoming payments",
+"✓ Märkisin makstuks: {0}":"✓ Marked as paid: {0}",
+"Uusi makseid arvetele ei leidnud.":"No new invoice payments found.",
+"Kontrolli üle: {0}":"Please check: {0}",
+"Summa klapib, aga maksja nimi ja arve number mitte. Kas see on selle arve makse?":"The amount matches, but the payer name and invoice number don't. Is this the payment for this invoice?",
+"Jah, märgi makstuks":"Yes, mark as paid",
+"Üle tähtaja: {0}":"Overdue: {0}",
+"Ootab makset: {0}":"Awaiting payment: {0}",
+"Ootab makset":"Awaiting payment",
+"tähtaeg oli {0}":"was due {0}",
+"tähtaeg {0}":"due {0}",
+"Peida":"Hide",
+"Pangaväljavõte":"Bank statement",
+"Lohista siia panga konto väljavõte või vali fail. Daybill märgib makstud arved ise. Fail jääb sinu seadmesse.":"Drop your bank statement here or choose a file. Daybill marks paid invoices for you. The file stays on your device.",
+"Vali fail":"Choose file",
+"Kust ma selle faili saan?":"Where do I get this file?",
+"Internetipangas ava konto väljavõte, vali periood (näiteks viimased 3 kuud) ja vajuta „Ekspordi”. Vali CSV või XML. Sobib Swedbank, SEB, LHV, Coop ja Luminor.":"In online banking, open your account statement, pick a period (for example the last 3 months) and tap “Export”. Choose CSV or XML. Works with Swedbank, SEB, LHV, Coop and Luminor.",
+"Nende puhul ma ei oleta. Vaata makse üle ja vajuta „Jah”, kui see on selle arve makse.":"I won’t guess on these. Check the payment and tap “Yes” if it’s for this invoice.",
+"Makse: {0}":"Payment: {0}",
+"Sama summaga arveid on mitu. Vali õige.":"Several invoices have the same amount. Pick the right one.",
+"Summa klapib, aga maksja nimi ja arve number mitte.":"The amount matches, but the payer name and invoice number don’t.",
+"Ootab makset {0} arvet":"{0} invoices awaiting payment"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

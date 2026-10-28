@@ -320,8 +320,10 @@ function decorate(){
  if(!hero){hero=document.createElement('div');hero.id='dbHero';hero.className='db-hero'}
  if(hero.nextSibling!==box)box.before(hero);
  let t=null;try{t=projectTotals(proj)}catch(e){}
- const days=new Set((proj.entries||[]).map(e=>e.date)).size;
- hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(t?t.gross:0)}</strong><span class="help">${[`ilma KM-ta ${money(t?t.net:0)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:[]).join(' · ')}</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-link" id="dbPdf">Salvesta PDF</button></div>`;
+ let io=null;try{io=invoiceOnly(proj)}catch(e){}
+ let days=0;try{days=workDays(proj,io)}catch(e){days=new Set((proj.entries||[]).map(e=>e.date)).size}
+ const gross=io?io.gross:t?t.gross:0,net=io?io.net:t?t.net:0;
+ hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(gross)}</strong><span class="help">${[`ilma KM-ta ${money(net)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:io?['tunnid teadmata']:[]).join(' · ')}</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-link" id="dbPdf">Salvesta PDF</button></div>`;
  $d('dbSend').onclick=()=>{const b=$d('pdfMail');b&&b.click()};
  $d('dbBill').onclick=()=>{const b=$d('invoiceTab');b&&b.click()};
  $d('dbPdf').onclick=()=>{const b=$d('pdf');b&&b.click()}}

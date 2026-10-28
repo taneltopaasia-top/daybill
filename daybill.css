@@ -237,3 +237,16 @@ td,th{border-bottom-color:var(--line)}
 }
 #cloudStatus:empty{display:none}
 @media(min-width:651px){#hoursView #cloudStatus{display:none}}
+
+/* Pangaväljavõte */
+.db-bank{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px dashed var(--line);background:var(--card);padding:16px;margin:0 0 8px}
+.db-bank.over{border-color:var(--fg);border-style:solid}
+.db-bank p{margin:4px 0 0}
+.db-bank-btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;cursor:pointer;margin:0;white-space:nowrap}
+.db-bank-how{margin:0 0 16px;font-size:13px}
+.db-bank-how summary{cursor:pointer;color:var(--muted);padding:6px 0}
+.db-bank-res{border:1px solid var(--line);padding:16px;margin:0 0 20px;font-size:14px}
+.db-bank-res h3{font-size:15px;margin:16px 0 6px}
+.db-bank-res ul{margin:0;padding-left:18px;line-height:1.7}
+.db-bank-res li button{margin:6px 0 8px;min-height:40px}
+@media(max-width:650px){.db-bank{flex-direction:column;align-items:stretch}.db-bank-btn{width:100%}}
