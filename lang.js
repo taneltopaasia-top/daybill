@@ -1783,7 +1783,15 @@ const EN=/*EN-START*/{
 "Loo projekt":"Create project",
 "Kirjuta projekti nimi.":"Type the project name.",
 "Vali, kas see on reklaam, film või muu.":"Choose whether it is a commercial, a film or something else.",
-"Kirjuta projekti nimi ja vali, kas see on reklaam, film või muu. Siis lisad oma ameti ja hinna ning saad kella käima panna.":"Type the project name and choose whether it is a commercial, a film or something else. Then add your job title and rate, and you can start the clock."
+"Kirjuta projekti nimi ja vali, kas see on reklaam, film või muu. Siis lisad oma ameti ja hinna ning saad kella käima panna.":"Type the project name and choose whether it is a commercial, a film or something else. Then add your job title and rate, and you can start the clock.",
+"Muud toimingud":"More actions",
+"Kuidas see töötab?":"How does it work?",
+"Viimased päevad":"Recent days",
+"Safaris Jaga → „Lisa avakuvale”":"In Safari: Share → “Add to Home Screen”",
+"Chrome’is menüü ⋮ → „Installi rakendus”":"In Chrome: menu ⋮ → “Install app”",
+"Chrome’is või Edge’is aadressiribal „Installi”, Macis Safaris Fail → „Lisa Docki”":"In Chrome or Edge: “Install” in the address bar. On a Mac in Safari: File → “Add to Dock”",
+"Arvuti":"Computer",
+"Daybill töötab ka ilma paigaldamata ja ilma internetita. Muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.":"Daybill also works without installing and without internet. Changes reach your other devices once you are back online."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
