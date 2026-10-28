@@ -306,3 +306,19 @@ td,th{border-bottom-color:var(--line)}
 @media(max-width:650px){.db-ico{width:38px;min-width:38px;height:38px;min-height:38px}.db-bar-in{gap:6px}}
 #invView .inv-tabs button{white-space:normal;line-height:1.15;overflow:hidden}
 @media(min-width:651px){table.inv-list td:last-child{white-space:normal;min-width:190px}table.inv-list td:last-child button{margin:2px 0}}
+/* Ühenduse täpp ribal */
+.db-conn{order:0;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 10px;border:1px solid transparent;background:none;color:var(--fg);font-size:13px;font-weight:600;white-space:nowrap}
+.db-conn{position:relative}
+.db-conn i{width:10px;height:10px;border-radius:50%!important;background:#e0a100;flex:none}
+.db-conn[data-s="ok"] i{background:#2fb35a}
+.db-conn[data-s="off"] i,.db-conn[data-s="err"] i{background:#e5372c}
+.db-conn[data-s="ok"] span,.db-conn[data-s="wait"] span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.db-conn[data-s="ok"],.db-conn[data-s="wait"]{width:40px;padding:0;justify-content:center}
+.db-conn[data-s="off"],.db-conn[data-s="err"]{border-color:#e5372c;color:#e5372c}
+.db-conn:hover{background:var(--card)}
+@media(max-width:650px){.db-conn{min-height:38px;padding:0 8px;font-size:12px;gap:6px}.db-conn[data-s="ok"],.db-conn[data-s="wait"],.db-conn[data-s="err"]{width:30px;min-width:30px;padding:0;justify-content:center}
+ .db-conn[data-s="err"] span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.db-brand{min-width:0}.db-gear{padding:6px 10px}}
+@media(max-width:380px){.db-brand{font-size:0!important;flex:1}.db-brand img{width:28px;height:28px}}
+/* iPad: kõik ühele reale (ka „Logi sisse” täpiga) */
+@media(min-width:651px) and (max-width:1100px){.db-bar-in{flex-wrap:nowrap;gap:8px;padding:10px 16px}.db-brand{min-width:0}.db-nav{gap:2px}.db-nav button{padding:8px 9px;gap:6px}.db-gear{padding:6px 10px;white-space:nowrap}}
+@media(min-width:651px) and (max-width:900px){.db-nav button svg{display:none}}

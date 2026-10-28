@@ -1729,7 +1729,11 @@ const EN=/*EN-START*/{
 "Salvesta tööaja ja kulude ülevaade (PDF)":"Save working time and cost overview (PDF)",
 "Projektil on fikseeritud hind, nii et see päev kogusummat ei muuda. Päev on ülevaates siiski näha.":"This project has a fixed price, so this day doesn’t change the total. It still shows in the overview.",
 "Laen…":"Loading…",
-"Sünkroonimine ei käivitunud. Kontrolli internetiühendust ja ava Daybill uuesti. Sinu andmed on selles seadmes alles.":"Sync didn’t start. Check your internet connection and open Daybill again. Your data is safe on this device."
+"Sünkroonimine ei käivitunud. Kontrolli internetiühendust ja ava Daybill uuesti. Sinu andmed on selles seadmes alles.":"Sync didn’t start. Check your internet connection and open Daybill again. Your data is safe on this device.",
+"Sünkroonitud":"Synced",
+"Pole ühendatud":"Not connected",
+"Mõni muudatus pole veel pilve jõudnud. Kui logid nüüd välja, kaovad need sellest seadmest. Oota paar sekundit, kuni ülal on roheline täpp, ja proovi uuesti. Kas login ikkagi välja?":"Some changes haven’t reached the cloud yet. If you sign out now, they’ll be lost from this device. Wait a few seconds until the dot at the top turns green, then try again. Sign out anyway?",
+"Login välja. Sinu projektid ja arved jäävad kontole alles ning see seade tühjendatakse. Järgmine kord logi sama e-postiga sisse ja kõik tuleb tagasi.":"Signing you out. Your projects and invoices stay safe in your account, and this device is cleared. Next time, sign in with the same email and everything comes back."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

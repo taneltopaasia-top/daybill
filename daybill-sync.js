@@ -16,7 +16,7 @@ function lastSync(){try{return Number(localStorage.getItem(lk()))||0}catch(e){re
 function seen(u){if(u>lastSync())try{localStorage.setItem(lk(),String(u))}catch(e){}}
 export function usage(){let b=0;try{for(const p of state.projects)if(!p.deleted)b+=JSON.stringify(p).length;for(const x of window.TraageldusInvoices.all())if(!x.deleted)b+=JSON.stringify(x).length;b+=JSON.stringify(window.DaybillSettings.get()).length}catch(e){}return Math.round(b*1.6)}
 window.daybillUsage=()=>({used:usage(),cap:CAP});
-const setStatus=t=>{status=t;const el=$('dbSync');if(el)el.textContent=t;const cs=$('cloudStatus');if(cs)cs.textContent=t};
+const setStatus=(t,c)=>{status=t;try{document.documentElement.dataset.sync=c||'wait';window.daybillConn&&window.daybillConn()}catch(e){}const el=$('dbSync');if(el)el.textContent=t;const cs=$('cloudStatus');if(cs)cs.textContent=t};
 const fp=v=>JSON.stringify(canon(v));
 const canon=v=>Array.isArray(v)?v.map(canon):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).filter(k=>!k.startsWith('_')&&k!=='draft'&&k!=='draftEditing'&&k!=='beforeEdit').sort().map(k=>[k,canon(v[k])])):v;
 
@@ -35,11 +35,11 @@ async function pushProjects(){if(!user)return;if(pushing){projectsChanged();retu
  for(const p of state.projects){const f=hash(p.deleted?'deleted':fp(p));if(pushed.get('p:'+p.id)===f)continue;
   if(full&&!p.deleted){blocked++;continue}
   p._u=Date.now();done.push(['p:'+p.id,f]);batch.set(F.doc(db,'users',user.uid,'projects',p.id),p.deleted?{deleted:true,u:p._u}:{data:JSON.stringify(p),u:p._u});n++;if(n>=400)break}
- if(blocked)setStatus('Pilve mälu on täis, nii et uusi muudatusi ei saadeta pilve. Ava Seaded → Mälu ja piirid ning kustuta mõni vana projekt.');
+ if(blocked)setStatus('Pilve mälu on täis, nii et uusi muudatusi ei saadeta pilve. Ava Seaded → Mälu ja piirid ning kustuta mõni vana projekt.','err');
  if(!n)return;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
- pushing=true;try{await batch.commit();for(const [k,f] of done)pushed.set(k,f);savePushed();setStatus('Sünkroonitud · '+user.email)}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}finally{pushing=false}
+ pushing=true;try{await batch.commit();for(const [k,f] of done)pushed.set(k,f);savePushed();setStatus('Sünkroonitud · '+user.email,'ok')}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles','wait')}finally{pushing=false}
  if(n>=400)projectsChanged()}
-async function pushInvoice(x){if(!user)return;const {F,db}=fb;const h=hash(x.deleted?'deleted':fp(x));try{await F.setDoc(F.doc(db,'users',user.uid,'invoices',x.id),x.deleted?{deleted:true,u:x._u||Date.now()}:{data:JSON.stringify(x),u:x._u||Date.now()});pushed.set('i:'+x.id,h);savePushed()}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}}
+async function pushInvoice(x){if(!user)return;const {F,db}=fb;const h=hash(x.deleted?'deleted':fp(x));try{await F.setDoc(F.doc(db,'users',user.uid,'invoices',x.id),x.deleted?{deleted:true,u:x._u||Date.now()}:{data:JSON.stringify(x),u:x._u||Date.now()});pushed.set('i:'+x.id,h);savePushed()}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles','wait')}}
 async function pushLog(e){if(!user)return;const {F,db}=fb;try{await F.setDoc(F.doc(db,'users',user.uid,'log',e.id),{data:JSON.stringify(e),u:e._u||Date.now()});pushed.set('l:'+e.id,1);savePushed()}catch(x){}}
 async function pushSettings(s){if(!user)return;const {F,db}=fb;try{await F.setDoc(F.doc(db,'users',user.uid,'meta','settings'),{data:JSON.stringify(s),u:s._u||Date.now()})}catch(e){}}
 
@@ -56,10 +56,24 @@ function applyProjects(docs){if(editingNow()){pendingRemote=docs;return}let chan
  savePushed();if(changed){if(!state.projects.some(p=>p.id===state.selected))state.selected=null;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}try{window.daybillRefresh&&window.daybillRefresh()}catch(e){}}}
 document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRemote&&!editingNow()){const d=pendingRemote;pendingRemote=null;applyProjects(d)}},0));
 
+/* Selle seadme andmed kuuluvad ühele kontole (daybill.owner). Kui sisse logib teine konto, tühjendatakse seade
+   ja uus kasutaja alustab puhtalt: teise inimese projektid, arved ega admini seaded ei jõua kunagi tema kontole. */
+const OWNER='daybill.owner',KEEP=new Set(['daybill.theme','daybill.installHidden','hoursLang']);
+function wipe(){try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('daybill.')&&!KEEP.has(k))ks.push(k)}for(const k of ks)localStorage.removeItem(k)}catch(e){}}
+function ownerOf(){try{const o=localStorage.getItem(OWNER);if(o)return o;for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';const m=k.match(/^daybill\.(?:pushed|lastSync)\.(.+)$/);if(m)return m[1]}}catch(e){}return ''}
+function own(u){const o=ownerOf();if(o&&o!==u.uid){wipe();try{localStorage.setItem(OWNER,u.uid)}catch(e){}window.daybillWiping=true;location.reload();return false}
+ try{localStorage.setItem(OWNER,u.uid)}catch(e){}return true}
+// Kas mõni muudatus on veel pilve saatmata?
+function unsynced(){if(!user)return 0;let n=0;try{for(const p of state.projects)if(pushed.get('p:'+p.id)!==hash(p.deleted?'deleted':fp(p)))n++;for(const x of window.TraageldusInvoices.all())if(pushed.get('i:'+x.id)!==hash(x.deleted?'deleted':fp(x)))n++;const L=window.DaybillLog;if(L)for(const e of L.all())if(!pushed.get('l:'+e.id))n++}catch(e){}return n}
+async function signOut(){const n=unsynced();
+ if(n){projectsChanged();if(!confirm('Mõni muudatus pole veel pilve jõudnud. Kui logid nüüd välja, kaovad need sellest seadmest. Oota paar sekundit, kuni ülal on roheline täpp, ja proovi uuesti. Kas login ikkagi välja?'))return}
+ else if(!confirm('Login välja. Sinu projektid ja arved jäävad kontole alles ning see seade tühjendatakse. Järgmine kord logi sama e-postiga sisse ja kõik tuleb tagasi.'))return;
+ window.daybillWiping=true;for(const f of unsub)f();unsub=[];try{await fb.A.signOut(fb.auth)}catch(e){}wipe();location.reload()}
+
 // Kui kuulaja katkeb (nt kohe pärast konto loomist), proovitakse paari sekundi pärast uuesti.
 let retryTimer=null,retries=0;
 function retry(u){setStatus('Sünk ootab ühendust');clearTimeout(retryTimer);if(retries>20)return;retryTimer=setTimeout(()=>{retries++;if(user&&user.uid===u.uid)start(u)},Math.min(60000,3000*(retries+1)))}
-async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatus('Andmed on selles seadmes · logi seadetes sisse, et sünkida');return}
+async function start(u){if(u&&!own(u))return;user=u;for(const f of unsub)f();unsub=[];if(!u){setStatus('Andmed on selles seadmes · logi seadetes sisse, et sünkida','off');return}
  const {F,db}=fb;setStatus('Sünkroonin…');
  loadPushed();const since=lastSync(),first=!since;
  // Loetakse ainult muudatused pärast viimast sünki (u > since), nii jäävad tasuta paketi lugemised väikseks.
@@ -68,7 +82,7 @@ async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatu
  unsub.push(F.onSnapshot(q('projects'),snap=>{const docs=snap.docChanges().filter(c=>c.type!=='removed'&&!c.doc.metadata.hasPendingWrites).map(c=>({...c.doc.data(),id:c.doc.id}));
   if(docs.length)applyProjects(docs);
   if(firstProjects&&!snap.metadata.fromCache){firstProjects=false;if(first){const remote=new Set(snap.docs.map(d=>d.id));for(const p of state.projects)if(!remote.has(p.id))pushed.delete('p:'+p.id)}projectsChanged()}
-  setStatus(snap.metadata.fromCache?'Ilma internetita · muudatused saadetakse hiljem':'Sünkroonitud · '+u.email)},()=>retry(u)));
+  setStatus(snap.metadata.fromCache?'Ilma internetita · muudatused saadetakse hiljem':'Sünkroonitud · '+u.email,snap.metadata.fromCache?'wait':'ok')},()=>retry(u)));
  unsub.push(F.onSnapshot(q('invoices'),snap=>{const T=window.TraageldusInvoices,ch=snap.docChanges().filter(c=>c.type!=='removed'&&!c.doc.metadata.hasPendingWrites);
   const docs=[];for(const c of ch){const d=c.doc.data();seen(d.u||0);if(d.deleted){T.receive([{id:c.doc.id,deleted:true,_u:d.u}]);continue}try{docs.push(JSON.parse(d.data))}catch(e){}}if(docs.length)T.receive(docs);
   if(firstInvoices&&!snap.metadata.fromCache){firstInvoices=false;const remote=new Set(snap.docs.map(d=>d.id));for(const x of T.all())if((first&&!remote.has(x.id))||pushed.get('i:'+x.id)!==hash(x.deleted?'deleted':fp(x)))pushInvoice(x);
@@ -85,8 +99,8 @@ function msgOf(e){const c=e&&e.code||'';return {'auth/invalid-email':'E-post on 
 let loadFailed=false;
 function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sünkroonimine ei käivitunud. Praegu on andmed ainult selles seadmes.</p>';return}if(!fb){el.innerHTML=loadFailed?'<p class="help">Sünkroonimine ei käivitunud. Kontrolli internetiühendust ja ava Daybill uuesti. Sinu andmed on selles seadmes alles.</p>':'<p class="help">Laen…</p>';return}
  if(user){el.innerHTML=`<p class="help">Sisse logitud: <strong>${esc(user.email)}</strong>. Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.</p><p class="help" id="syncState">${esc(status)}</p><div class="actions"><button type="button" id="syOut">Logi välja</button><button type="button" id="syDel">Kustuta konto ja pilves olevad andmed</button></div><p class="error" id="syErr" role="alert"></p>`;
-  $('syOut').onclick=async()=>{await fb.A.signOut(fb.auth);renderBox(el)};
-  $('syDel').onclick=async()=>{if(!confirm('Kustutan sinu konto ja kõik pilves olevad andmed (projektid, arved). Selles seadmes olevad andmed jäävad alles. Seda ei saa tagasi võtta. Jätkan?'))return;try{const {F,db}=fb,uid=user.uid;for(const c of ['projects','invoices','meta','log']){const s=await F.getDocs(F.collection(db,'users',uid,c));for(const d of s.docs)await F.deleteDoc(d.ref)}await fb.A.deleteUser(user);renderBox(el)}catch(e){$('syErr').textContent=msgOf(e)}};return}
+  $('syOut').onclick=signOut;
+  $('syDel').onclick=async()=>{if(!confirm('Kustutan sinu konto ja kõik pilves olevad andmed (projektid, arved). Selles seadmes olevad andmed jäävad alles. Seda ei saa tagasi võtta. Jätkan?'))return;try{const {F,db}=fb,uid=user.uid;for(const c of ['projects','invoices','meta','log']){const s=await F.getDocs(F.collection(db,'users',uid,c));for(const d of s.docs)await F.deleteDoc(d.ref)}await fb.A.deleteUser(user);try{for(const k of [OWNER,'daybill.pushed.'+uid,'daybill.lastSync.'+uid])localStorage.removeItem(k)}catch(e){}renderBox(el)}catch(e){$('syErr').textContent=msgOf(e)}};return}
  el.innerHTML=`<p class="help">Logi sisse samal e-postiga telefonis ja arvutis. Siis näed telefonis tehtud tööpäevi kohe arvutis. Konto on tasuta.</p><form id="syForm"><div class="grid"><div><label for="syEmail">E-post (see on sinu kasutajanimi)</label><input id="syEmail" type="email" autocomplete="email" required></div><div><label for="syPass">Parool (vähemalt 6 märki)</label><input id="syPass" type="password" autocomplete="current-password" required minlength="6"></div></div><div class="actions" style="margin-top:14px"><button class="primary" id="syIn">Logi sisse</button><button type="button" id="syNew">Loo uus konto</button><button type="button" id="syForgot">Unustasin parooli</button></div><p class="error" id="syErr" role="alert"></p><p class="help" id="syInfo" role="status"></p></form>`;
  const go=async create=>{const e=$('syEmail').value.trim(),p=$('syPass').value;$('syErr').textContent='';try{if(create)await fb.A.createUserWithEmailAndPassword(fb.auth,e,p);else await fb.A.signInWithEmailAndPassword(fb.auth,e,p);renderBox(el)}catch(x){$('syErr').textContent=msgOf(x)}};
  $('syForm').onsubmit=ev=>{ev.preventDefault();go(false)};$('syNew').onclick=()=>{if($('syForm').reportValidity())go(true)};
@@ -94,5 +108,5 @@ function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sün
 window.daybillRenderSync=renderBox;
 
 if(cfg){setStatus('Ühendan…');load().then(x=>{fb=x;window.daybillSaved=projectsChanged;window.daybillInvoiceSaved=pushInvoice;window.daybillSettingsSaved=pushSettings;window.daybillLogSaved=pushLog;window.daybillReserveNumber=x2=>user?reserve(x2):Promise.resolve();
- fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>{loadFailed=true;setStatus('Sünkroonimine ei käivitunud · andmed on selles seadmes alles');const box=$('syncBox');if(box)renderBox(box)})}
-else setStatus('Andmed on selles seadmes');
+ fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>{loadFailed=true;setStatus('Sünkroonimine ei käivitunud · andmed on selles seadmes alles','err');const box=$('syncBox');if(box)renderBox(box)})}
+else setStatus('Andmed on selles seadmes','err');
