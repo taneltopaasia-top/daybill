@@ -91,6 +91,8 @@ main{margin-top:34px}
 .db-wiz .db-welcome-in{padding:28px 24px;text-align:left}
 .db-wiz h2{font-size:24px;margin:0 0 10px}
 .wiz-big{font-size:17px;line-height:1.5}
+.wiz-how{font-size:16px;line-height:1.6;background:var(--card);padding:14px 16px;margin:14px 0 0}
+.wiz-how .db-share{width:14px;height:16px;vertical-align:-2px}
 .wiz-in{width:100%;font-size:18px;min-height:52px;margin:10px 0 0}
 .wiz-actions{display:grid;gap:10px;margin-top:18px}
 .wiz-actions button,.wiz-choice button{min-height:54px;font-size:17px;width:100%}

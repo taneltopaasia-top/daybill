@@ -1753,7 +1753,24 @@ const EN=/*EN-START*/{
 "See aeg kattub juba salvestatud tööpäevaga ({0} {1} → {2}).":"That time overlaps a day you already saved ({0} {1} → {2}).",
 "Lõpuaeg ei saa olla tulevikus. Kui töö veel käib, vajuta hiljem „Wrap · lõpeta”.":"The end time can’t be in the future. If you’re still working, tap “Wrap · finish” later.",
 "See aeg kattub juba salvestatud tööpäevaga: {0} {1} → {2}.":"That time overlaps a day you already saved: {0} {1} → {2}.",
-"Mitu tundi? Vali ja lõpuaeg arvutatakse ise":"How many hours? Pick one and the end time is set for you"
+"Mitu tundi? Vali ja lõpuaeg arvutatakse ise":"How many hours? Pick one and the end time is set for you",
+"Tere! Mis su nimi on?":"Hi! What’s your name?",
+"Daybill paneb kirja sinu tööpäevad ja teeb neist arve. Nimi läheb tunnilehele ja arvele.":"Daybill keeps track of your working days and turns them into invoices. Your name goes on the timesheet and the invoice.",
+"Kirjuta oma nimi, siis saame edasi minna.":"Type your name and we’ll carry on.",
+"Tee Daybillist äpp":"Make Daybill an app",
+"Lisa Daybill oma avakuvale, siis on kell alati ühe vajutuse kaugusel.":"Add Daybill to your home screen, so the clock is always one tap away.",
+"Üks vajutus ja Daybilli ikoon tekib sinu avakuvale. Siis avaneb Daybill nagu tavaline äpp.":"One tap and the Daybill icon appears on your home screen. Then Daybill opens like any other app.",
+"Vajuta all Jaga {0} ja siis „Lisa avakuvale”. Daybilli ikoon tekib avakuvale.":"Tap Share {0} at the bottom, then “Add to Home Screen”. The Daybill icon appears on your home screen.",
+"Ava see link Safaris, vajuta Jaga {0} ja siis „Lisa avakuvale”.":"Open this link in Safari, tap Share {0}, then “Add to Home Screen”.",
+"Vajuta brauseri menüüd ⋮ ja vali „Installi” või „Lisa avakuvale”.":"Tap the browser menu ⋮ and choose “Install” or “Add to Home screen”.",
+"Vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.":"Tap the ⋮ menu at the top right and choose “Install app” or “Add to Home screen”.",
+"Safari menüüs vali Fail → „Lisa Docki”. Daybill tekib Docki nagu tavaline äpp.":"In the Safari menu choose File → “Add to Dock”. Daybill appears in your Dock like any other app.",
+"Chrome’is või Edge’is vajuta aadressiriba paremas servas paigaldusikooni. Võid Daybilli ka lihtsalt brauseris edasi kasutada.":"In Chrome or Edge, click the install icon at the right end of the address bar. You can also just keep using Daybill in the browser.",
+"Hiljem":"Later",
+"Loo esimene projekt.":"Create your first project.",
+"Kirjuta filmi, reklaami või kliendi nimi ja vajuta „Lisa”. Siis lisad oma ameti ja hinna ning saad kella käima panna.":"Type the name of the film, commercial or client and tap “Add”. Then add your job title and rate, and you can start the clock.",
+"Peaaegu valmis.":"Almost there.",
+"Kirjuta allpool „Projekti valikud” alla oma amet ja tunni- või päevatasu. Siis vajuta „Call” ja kell hakkab käima.":"Under “Project options” below, type your job title and your hourly or day rate. Then tap “Call” and the clock starts."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

@@ -61,7 +61,7 @@ const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 function elapsed(c){const now=Date.now(),start=Date.parse(c.start),paused=(c.pauseSeconds||0)*1000+(c.pausedAt?now-Date.parse(c.pausedAt):0);return Math.max(0,now-start-paused)}
 function fmt(ms){const s=Math.floor(ms/1000);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
 function renderClock(){const p=cp();clearInterval(tick);
- if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><p class="help">Alusta uue projektiga: kirjuta selle nimi.</p>${newProjectHtml()}</div>`;bindNew();return}
+ if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><div class="ck-tip ck-first" role="status"><strong>Loo esimene projekt.</strong><br><span>Kirjuta filmi, reklaami või kliendi nimi ja vajuta „Lisa”. Siis lisad oma ameti ja hinna ning saad kella käima panna.</span></div>${newProjectHtml()}</div>`;bindNew();return}
  const c=p.clock;let rows=[];try{rows=calculate(p,p.entries)}catch(e){}
  const t=(()=>{try{return projectTotals(p,rows)}catch(e){return null}})();
  const recent=[...rows].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start)).slice(0,5);
@@ -122,7 +122,7 @@ function priceLabel(p){try{if(isFixed(p))return money(p.fixedPrice)+' fikseeritu
 // Kellast eelvaatesse: sama projekt lahti, tööaja vaade.
 function openPreview(pid){state.selected=pid;try{archiveView=false;projectExpanded=true;setStage('hours')}catch(e){}save();show('hours');setTimeout(()=>{const el=$d('summary');el&&el.scrollIntoView({block:'start'})},50)}
 function newProjectHtml(){return `<div class="clock-field"><label for="ckName">Uue projekti nimi</label><div class="clock-new"><input id="ckName" maxlength="120" placeholder="nt Reklaam Sõida Kainelt"><button id="ckAdd" type="button">Lisa</button></div></div>`}
-function bindNew(){const add=$d('ckAdd');if(!add)return;add.onclick=()=>{const name=$d('ckName').value.trim();if(!name){$d('ckName').focus();return}const n=project(name);const last=active()[0];if(last)for(const k of ['worker','job','rate','vat','ot','double','triple','round','reportLang','pricing','dayRate','dayHours','rules'])if(last[k]!==undefined)n[k]=JSON.parse(JSON.stringify(last[k]));lastWrap=null;state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();renderClock()}}
+function bindNew(){const add=$d('ckAdd');if(!add)return;add.onclick=()=>{const name=$d('ckName').value.trim();if(!name){$d('ckName').focus();return}const n=project(name);const last=active()[0];if(!last){try{n.worker=localStorage.getItem(WORKER)||''}catch(e){}n.reportLang=(window.HoursI18n&&window.HoursI18n.lang)==='et'?'et':'en'}if(last)for(const k of ['worker','job','rate','vat','ot','double','triple','round','reportLang','pricing','dayRate','dayHours','rules'])if(last[k]!==undefined)n[k]=JSON.parse(JSON.stringify(last[k]));lastWrap=null;state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();renderClock()}}
 
 
 /* ---------- 3 · kokkuvõte (ilma raamatupidamiseta) ---------- */
@@ -307,43 +307,48 @@ document.title='Daybill';
 // Esimene vaade: telefonis kell, arvutis projektid.
 let first='clock';try{first=localStorage.getItem(VIEW_KEY)||'clock'}catch(e){}
 show(first);
-// Esimene avamine: lühike juhend samm-sammult. Uus kasutaja vastab neljale küsimusele ja Daybill seab kõik ise valmis.
-const WELCOME='daybill.welcome.v1';let seen=false;try{seen=!!localStorage.getItem(WELCOME)}catch(e){}
+// Esimene avamine: keel, nimi ja avakuvale lisamine. Projekt, amet ja hind tulevad hiljem kella vaates.
+const WELCOME='daybill.welcome.v1',WORKER='daybill.worker';let seen=false;try{seen=!!localStorage.getItem(WELCOME)}catch(e){}
 const hasProjects=()=>state.projects.some(x=>!x.deleted&&!x.kind);
+// Avakuvale lisamise juhis sellele seadmele: tekst ja kas brauser pakub ühe vajutusega paigaldust.
+function installHow(){if(installEvt)return {html:'Üks vajutus ja Daybilli ikoon tekib sinu avakuvale. Siis avaneb Daybill nagu tavaline äpp.',btn:true};
+ if(iosSafari)return {html:T_('Vajuta all Jaga {0} ja siis „Lisa avakuvale”. Daybilli ikoon tekib avakuvale.',SHARE_ICON)};
+ if(ios)return {html:T_('Ava see link Safaris, vajuta Jaga {0} ja siis „Lisa avakuvale”.',SHARE_ICON)};
+ if(android)return {html:/Firefox/i.test(navigator.userAgent)?'Vajuta brauseri menüüd ⋮ ja vali „Installi” või „Lisa avakuvale”.':'Vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.'};
+ if(macSafari)return {html:'Safari menüüs vali Fail → „Lisa Docki”. Daybill tekib Docki nagu tavaline äpp.'};
+ return {html:'Chrome’is või Edge’is vajuta aadressiriba paremas servas paigaldusikooni. Võid Daybilli ka lihtsalt brauseris edasi kasutada.'}}
 function startWizard(){const w=document.createElement('div');w.className='db-welcome db-wiz';w.setAttribute('role','dialog');w.setAttribute('aria-label','Alustamine');document.body.append(w);
- const ans={name:'',job:'',rate:'',project:''};let step=0;
+ const ans={name:''};try{ans.name=localStorage.getItem(WORKER)||''}catch(e){}let step=0;
  const lang=()=>(window.HoursI18n&&window.HoursI18n.lang)||'et';
- const dots=n=>`<div class="wiz-dots" aria-hidden="true">${[1,2,3,4].map(i=>`<span class="${i<=n?'on':''}"></span>`).join('')}</div>`;
+ // Avakuvalt avatud äpis on paigaldus juba tehtud: siis ainult keel ja nimi.
+ const total=standalone?1:2;
+ const dots=n=>`<div class="wiz-dots" aria-hidden="true">${Array.from({length:total},(_,i)=>`<span class="${i<n?'on':''}"></span>`).join('')}</div>`;
  const close=()=>{setFlag(WELCOME,'1');w.remove()};
  const steps=[
   ()=>`<h2 translate="no">Daybill</h2><p class="wiz-big" translate="no">Vali keel · Choose language</p><div class="wiz-choice" translate="no"><button type="button" data-lang="et">Eesti</button><button type="button" data-lang="en">English</button></div>`,
-  ()=>`<h2>Tere!</h2><p class="wiz-big">Daybill paneb kirja sinu tööpäevad ja teeb neist arve.</p><p>Seadistamine võtab umbes minuti. Daybill on tasuta ja jääb tasuta.</p><div class="wiz-actions"><button type="button" class="primary wiz-go">Alustame</button><button type="button" class="wiz-have">Mul on juba konto</button></div>`,
-  ()=>`${dots(1)}<h2>Mis su nimi on?</h2><p>See läheb tunnilehele ja arvele.</p><input class="wiz-in" id="wizIn" autocomplete="name" maxlength="120" placeholder="Ees- ja perekonnanimi" value="${escH(ans.name)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
-  ()=>`${dots(2)}<h2>Mis tööd sa teed?</h2><p>Vali üks või kirjuta ise.</p><div class="wiz-chips">${['Gaffer','Best boy','Valgustaja','Grip','Operaator','Kunstnik'].map(j=>`<button type="button" data-job="${j}">${j}</button>`).join('')}</div><input class="wiz-in" id="wizIn" maxlength="80" placeholder="Amet" value="${escH(ans.job)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
-  ()=>`${dots(3)}<h2>Kui palju sa tunnis küsid?</h2><p>Summa ilma käibemaksuta. Ületunnid arvutab Daybill ise ja hinda saad hiljem alati muuta.</p><div class="wiz-rate"><input class="wiz-in" id="wizIn" type="text" inputmode="decimal" autocomplete="off" placeholder="30" value="${escH(ans.rate)}"><span>€ / h</span></div><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
-  ()=>`${dots(4)}<h2>Mis projektiga alustad?</h2><p>Näiteks filmi, reklaami või kliendi nimi.</p><input class="wiz-in" id="wizIn" maxlength="120" placeholder="nt Reklaam Sõida Kainelt" value="${escH(ans.project)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Valmis</button></div>`];
- const keys=[null,null,'name','job','rate','project'];
- function draw(){w.innerHTML=`<div class="db-welcome-in">${steps[step]()}<p class="error" id="wizErr" role="alert"></p>${step>1?'<button type="button" class="wiz-back">← Tagasi</button>':''}</div>`;
+  ()=>`${dots(1)}<h2>Tere! Mis su nimi on?</h2><p>Daybill paneb kirja sinu tööpäevad ja teeb neist arve. Nimi läheb tunnilehele ja arvele.</p><input class="wiz-in" id="wizIn" autocomplete="name" maxlength="120" placeholder="Ees- ja perekonnanimi" value="${escH(ans.name)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">${total>1?'Edasi':'Valmis'}</button><button type="button" class="wiz-have">Mul on juba konto</button></div>`,
+  ()=>{const m=installHow();return `${dots(2)}<h2>Tee Daybillist äpp</h2><p class="wiz-big">Lisa Daybill oma avakuvale, siis on kell alati ühe vajutuse kaugusel.</p><p class="wiz-how">${m.html}</p><div class="wiz-actions">${m.btn?'<button type="button" class="primary wiz-inst">Paigalda</button><button type="button" class="wiz-go">Hiljem</button>':'<button type="button" class="primary wiz-go">Tehtud</button><button type="button" class="wiz-later">Hiljem</button>'}</div>`}];
+ function draw(){w.innerHTML=`<div class="db-welcome-in">${steps[step]()}<p class="error" id="wizErr" role="alert"></p>${step>0?'<button type="button" class="wiz-back">← Tagasi</button>':''}</div>`;
   const inp=w.querySelector('#wizIn');if(inp){setTimeout(()=>inp.focus(),30);inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();next()}}}
   w.querySelectorAll('[data-lang]').forEach(b=>{b.classList.toggle('primary',b.dataset.lang===lang());b.onclick=()=>{try{window.HoursI18n.set(b.dataset.lang)}catch(e){}step=1;draw()}});
-  w.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{inp.value=b.textContent;next()});
   const go=w.querySelector('.wiz-go');go&&(go.onclick=next);
-  const have=w.querySelector('.wiz-have');have&&(have.onclick=()=>{close();show('settings');setTimeout(()=>{const e=$d('syEmail');e&&(e.scrollIntoView({block:'center'}),e.focus())},80)});
-  const back=w.querySelector('.wiz-back');back&&(back.onclick=()=>{if(inp)ans[keys[step]]=inp.value.trim();step--;draw()})}
- function next(){const k=keys[step];if(!k){step++;draw();return}
+  const later=w.querySelector('.wiz-later');later&&(later.onclick=finish);
+  const inst=w.querySelector('.wiz-inst');inst&&(inst.onclick=async()=>{const e=installEvt;if(!e){finish();return}installEvt=null;try{await e.prompt();await e.userChoice}catch(x){}installBar&&installBar.remove();finish()});
+  const have=w.querySelector('.wiz-have');have&&(have.onclick=()=>{if(inp&&inp.value.trim())setFlag(WORKER,inp.value.trim());close();show('settings');setTimeout(()=>{const e=$d('syEmail');e&&(e.scrollIntoView({block:'center'}),e.focus())},80)});
+  const back=w.querySelector('.wiz-back');back&&(back.onclick=()=>{if(inp)ans.name=inp.value.trim();step--;draw()})}
+ // Chrome annab paigaldusvõimaluse alles mõne hetke pärast: joonista paigaldussamm siis uuesti.
+ window.addEventListener('beforeinstallprompt',()=>{if(step===2&&w.isConnected)setTimeout(draw,0)});
+ function next(){if(step===2){finish();return}if(step===0){step=1;draw();return}
   const inp=w.querySelector('#wizIn'),v=inp.value.trim(),err=w.querySelector('#wizErr');
-  if(!v){err.textContent=k==='rate'?'Kirjuta oma tunnihind, näiteks 30.':'Palun täida see lahter.';inp.focus();return}
-  if(k==='rate'){const n=Number(v.replace(',','.'));if(!(n>0)||n>10000){err.textContent='Kirjuta tunnihind numbrina, näiteks 30.';inp.focus();return}ans.rate=String(n)}else ans[k]=v;
-  if(step<steps.length-1){step++;draw();return}
+  if(!v){err.textContent='Kirjuta oma nimi, siis saame edasi minna.';inp.focus();return}
+  ans.name=v;setFlag(WORKER,v);if(step<total){step++;draw();return}
   finish()}
- function finish(){const n=project(ans.project);n.worker=ans.name;n.job=ans.job;n.rate=Number(ans.rate);n.reportLang=lang();
-  state.projects.push(n);state.selected=n.id;clockProject=n.id;setFlag('daybill.clockProject',n.id);save();
-  setFlag(TOUR,'call');close();show('clock')}
+ function finish(){if(ans.name)setFlag(WORKER,ans.name);setFlag(TOUR,'call');close();show('clock')}
  draw()}
 if(!seen){if(hasProjects())setFlag(WELCOME,'1');else startWizard()}
 // Juhend kella vaates: üks lause korraga, kuni esimene päev on tehtud.
 function tourTip(p){let t='';try{t=localStorage.getItem(TOUR)||''}catch(e){}if(!t||!p)return '';
- const msg=p.clock?['Kell käib.','Kui päev on läbi, vajuta „Wrap”. Telefoni võid vahepeal ära panna, kell käib edasi. Lõunapausi ajaks vajuta „Paus”.']
+ const msg=!p.job&&!p.clock?['Peaaegu valmis.','Kirjuta allpool „Projekti valikud” alla oma amet ja tunni- või päevatasu. Siis vajuta „Call” ja kell hakkab käima.']:p.clock?['Kell käib.','Kui päev on läbi, vajuta „Wrap”. Telefoni võid vahepeal ära panna, kell käib edasi. Lõunapausi ajaks vajuta „Paus”.']
   :lastWrap&&lastWrap.pid===p.id?['Esimene päev on kirjas!','Vajuta „Tee arve eelvaade”. Seal näed tunde ja summat ning saad need produtsendile saata. Arve teed hiljem nupust „Arve”.']
   :['Kõik on valmis.','Kui töö algab, vajuta „Call”. Daybill hakkab aega lugema.'];
  return `<div class="ck-tip" role="status"><strong>${msg[0]}</strong><br><span>${msg[1]}</span><button type="button" class="ck-tip-x" id="ckTipX" aria-label="Peida juhend">Peida juhend</button></div>`}
