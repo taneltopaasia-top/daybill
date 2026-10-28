@@ -1567,7 +1567,16 @@ const EN=/*EN-START*/{
 "Sisse logitud: {0}. Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":"Signed in: {0}. Sign in with the same account on your phone and computer: projects, hours and invoices are on both.",
 "Sisse logitud:":"Signed in:",
 ". Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":". Sign in with the same account on your phone and computer: projects, hours and invoices are on both.",
-"Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":"Sign in with the same account on your phone and computer: projects, hours and invoices are on both."
+"Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.":"Sign in with the same account on your phone and computer: projects, hours and invoices are on both.",
+"E-post (see on sinu kasutajanimi)":"Email (this is your username)",
+"Kirjuta ülemisse lahtrisse oma e-post ja vajuta uuesti „Unustasin parooli”.":"Type your email in the box above and tap “Forgot password” again.",
+"Saatsin parooli muutmise lingi.":"Password reset link sent.",
+"Ava see kiri, vajuta lingil, pane uus parool ja logi siin sisse.":"Open the email, tap the link, set a new password and sign in here.",
+"Kui kirja paari minutiga pole, vaata rämpsposti.":"If it has not arrived in a couple of minutes, check your spam folder.",
+"Kui ka seal pole, ei ole sellel aadressil Daybilli kontot: proovi oma teist e-posti aadressi.":"If it is not there either, this address has no Daybill account: try your other email address.",
+"E-post või parool on vale. Kui unustasid parooli, vajuta „Unustasin parooli”.":"Wrong email or password. If you forgot your password, tap “Forgot password”.",
+"Kui unustasid parooli, vajuta „Unustasin parooli”.":"If you forgot your password, tap “Forgot password”.",
+"Unustasin parooli":"Forgot password"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
