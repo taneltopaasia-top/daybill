@@ -107,3 +107,133 @@ main{margin-top:34px}
 /* Telefonis: lahtrid 16 px, et iPhone ei suumiks lahtrisse vajutades; nupud reageerivad kohe. */
 @media (pointer:coarse){input,select,textarea{font-size:16px}}
 button,a,label,select{touch-action:manipulation}
+
+/* ===== Disain 2 (28.10.2026): Helvetica Neue, Šveitsi stiil, teravad nurgad, menüü telefonis all ===== */
+html[data-theme=dark]{--fg:#f2f2f2;--bg:#0e0e0e;--card:#1a1a1a;--line:#2e2e2e;--muted:#a3a3a3;--rec:#ff5a4a;--shade:#000c;color-scheme:dark}
+html[data-theme=light]{--fg:#0e0e0e;--bg:#ffffff;--card:#f2f2f2;--line:#dcdcdc;--muted:#5c5c5c;--rec:#d92b1a;--shade:#0008;color-scheme:light}
+@media print{html[data-theme]{--fg:#000;--bg:#fff;--card:#fff;--line:#000;--muted:#333}}
+*{border-radius:0!important}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:-.1px}
+button,input,select,textarea{font-family:inherit}
+h1{font-size:40px;font-weight:700;letter-spacing:-1.6px;line-height:1}
+h2{font-weight:700;letter-spacing:-.4px}
+.help,label{color:var(--muted)}
+#langSwitch{display:none!important}
+#collectionHelp{display:none}
+#hoursView>.row.top .actions{display:none}
+input,select,textarea{background:var(--card);border-color:var(--line)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--fg);outline-offset:-2px}
+.section{border-bottom-color:var(--line)}
+td,th{border-bottom-color:var(--line)}
+
+/* Riba */
+.db-bar{border-bottom:1px solid var(--line)}
+.db-bar-in{max-width:940px;padding:12px 24px}
+.db-brand{font-size:21px;font-weight:700;letter-spacing:-.8px;flex:1}
+.db-nav{display:flex;gap:4px}
+.db-nav button{display:flex;align-items:center;gap:8px;border:0;background:none;color:var(--muted);font-weight:500;padding:8px 12px;min-height:40px}
+.db-nav button:hover{background:var(--card);color:var(--fg)}
+.db-nav button.primary{background:var(--fg);color:var(--bg)}
+.db-nav svg{flex:none}
+.db-gear{order:0;border-color:var(--line);min-height:40px}
+.db-gear.primary{border-color:var(--fg)}
+.db-sync{color:var(--muted)}
+@media(max-width:650px){
+ .db-bar-in{padding:10px 16px;flex-wrap:nowrap}
+ .db-brand{font-size:20px}
+ .db-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:auto;background:var(--bg);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+ .db-nav button{flex-direction:column;gap:3px;font-size:11px;font-weight:600;padding:6px 2px;min-height:52px;justify-content:center}
+ .db-nav button.primary{background:none;color:var(--fg)}
+ .db-nav button.primary svg{stroke-width:2.4}
+ .db-gear{min-height:40px;padding:6px 12px;font-size:14px}
+ body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+ h1{font-size:34px}
+}
+
+/* Kell */
+.clock-face{width:auto;height:auto;border:0;margin:34px 0 26px;gap:12px}
+.clock-face.on{background:none;color:var(--fg)}
+.ck-state{font-size:13px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.clock-face.on .ck-state{color:var(--rec)}
+.clock-face.on .ck-state::before{content:"";width:10px;height:10px;background:var(--rec);border-radius:50%!important;animation:dbRec 1.6s steps(2,start) infinite}
+.clock-face.paused .ck-state{color:var(--fg)}
+@keyframes dbRec{to{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.clock-face.on .ck-state::before{animation:none}}
+.clock-time{font:500 64px "SF Mono",ui-monospace,Menlo,monospace;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums}
+.clock-face .clock-sub{font-size:14px;color:var(--muted)}
+.clock-btns{grid-template-columns:1fr 2fr}
+.clock-btns button{min-height:66px;font-size:18px;font-weight:700}
+.clock-list h2{font-size:19px}
+.clock-list .row-item{border-bottom-color:var(--line);font-size:14px}
+.ck-opts{border:0;background:var(--card)}
+.ck-tip{border:0;background:var(--card);border-left:0}
+#ckProject{min-height:56px;font-size:17px;font-weight:600}
+
+/* Projektid */
+.project-card{border:0;background:var(--card)}
+.project-toggle{background:none;padding:18px 16px}
+.project-toggle:hover{background:none}
+.project-toggle.active{background:var(--fg);color:var(--bg)}
+.project-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.project-meta{color:var(--muted)}
+.project-toggle.active .project-meta{color:inherit;opacity:.75}
+.project-add{border-style:dashed;border-color:var(--line)}
+.projects{border-bottom-color:var(--line)}
+.db-hero{background:var(--bg);border:1px solid var(--line);padding:18px;margin:0 0 18px;display:flex;flex-direction:column;gap:16px}
+.db-hero-sum{display:flex;flex-direction:column;gap:4px}
+.db-hero-sum strong{font-size:36px;font-weight:700;letter-spacing:-1.2px;line-height:1.1}
+.db-hero-sum .help{margin:0}
+.db-hero-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.db-hero-btns button{min-height:52px;font-weight:700}
+.day{background:var(--bg);border:1px solid var(--line);padding:4px 14px;margin:10px 0}
+.day-heading{border-bottom-color:var(--line)}
+.approval{border-color:var(--line)}
+.summary strong{font-weight:700;letter-spacing:-.6px}
+
+/* Arved */
+#invView .inv-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);padding:3px}
+#invView .inv-tabs button{border:0;min-height:40px;padding:6px 4px;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#invView .inv-tabs button:not(.primary){background:none;color:var(--fg)}
+.inv-strip{border:0;background:var(--card);font-size:14px}
+.inv-total strong{font-weight:700;letter-spacing:-.6px}
+.inv-warn{border-color:var(--fg)}
+@media(max-width:650px){
+ table.inv-list thead{display:none}
+ table.inv-list,table.inv-list tbody{display:block}
+ table.inv-list tr{display:grid;grid-template-columns:1fr auto;grid-template-areas:"client sum" "meta status" "act act";gap:4px 12px;background:var(--card);padding:14px;margin:0 0 8px}
+ table.inv-list td{border:0;padding:0;white-space:normal;font-size:13px}
+ table.inv-list td:nth-child(1){grid-area:meta;color:var(--muted)}
+ table.inv-list td:nth-child(2){display:none}
+ table.inv-list td:nth-child(3){grid-area:client;font-size:15px;font-weight:700}
+ table.inv-list td:nth-child(4){grid-area:sum;font-size:15px;font-weight:700;text-align:right}
+ table.inv-list td:nth-child(5){grid-area:status;text-align:right}
+ table.inv-list td:nth-child(6){grid-area:act;padding-top:8px}
+ table.inv-list td:nth-child(6){display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+ table.inv-list td:nth-child(6) button{width:100%;min-height:40px;padding:6px 4px;font-size:13px;margin:0}
+ table.inv-list tr.paid td{opacity:1}
+ table.inv-list tr.paid td:nth-child(5){color:var(--muted)}
+ #invView .inv-tabs button{font-size:13px}
+}
+
+/* Seaded ja juhend */
+.set-note{border:0;background:var(--card)}
+.db-wiz h2{font-size:32px;letter-spacing:-1.2px}
+.db-welcome-in{border-color:var(--line)}
+.db-hero-btns .db-link{grid-column:1/-1;min-height:40px;border:0;background:none;color:var(--fg);text-decoration:underline;font-weight:500}
+
+/* Projekti vaade lihtsamaks */
+#projectEditor>nav{display:none}
+#hoursStage>.section:first-child>.row.top{flex-wrap:wrap;gap:6px 18px;margin-bottom:16px!important;justify-content:flex-start}
+#name{display:none}
+#hoursStage>.section:first-child>.row.top .actions{gap:4px 16px}
+#hoursStage>.section:first-child>.row.top .actions button,.db-link{border:0;background:none!important;color:var(--muted)!important;min-height:36px;padding:6px 0;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+#hoursStage>.section:first-child>.row.top .actions button:hover,.db-link:hover{color:var(--fg)!important}
+#summary{display:none}
+@media(max-width:650px){
+ .day td:nth-child(n+3):nth-last-child(n+3),.day th:nth-child(n+3):nth-last-child(n+3){display:none}
+ .day td,.day th{white-space:normal}
+ .day td:last-child{white-space:nowrap;text-align:right}
+ .db-hero-sum strong{font-size:32px}
+}
+#cloudStatus:empty{display:none}
+@media(min-width:651px){#hoursView #cloudStatus{display:none}}

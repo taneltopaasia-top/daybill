@@ -20,7 +20,7 @@ const setView=document.createElement('section');setView.id='settingsView';setVie
 const backup=$d('backupDetails');
 
 const bar=document.createElement('header');bar.className='db-bar';
-bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><button class="db-gear" data-view="settings" aria-label="Seaded">Seaded</button><nav class="db-nav"><button data-view="clock">Kell</button><button data-view="hours">Eelvaade</button><button data-view="inv">Arve</button></nav></div>`;
+bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button></nav><button class="db-gear" data-view="settings">Seaded</button></div>`;
 document.body.prepend(bar);
 let view='hours';
 const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView]];
@@ -32,7 +32,7 @@ if(optForm){optForm.parentNode.insertBefore(pvOpts,optForm);pvOpts.append(optFor
 const optHome={parent:pvOpts,next:null};
 function optBack(){if(optForm&&optForm.parentNode!==optHome.parent)optHome.parent.insertBefore(optForm,optHome.next)}
 function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum')}catch(e){}}view=VIEWS.some(x=>x[0]===v)?v:'clock';if(view!=='clock')optBack();for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.toggle('hidden',k!==view)}
- bar.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('primary',b.dataset.view===view));
+ bar.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('primary',b.dataset.view===view);b.toggleAttribute('aria-current',b.dataset.view===view)});
  try{localStorage.setItem(VIEW_KEY,view)}catch(e){}
  if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}if(view==='hours')try{render()}catch(e){}
  window.scrollTo(0,0)}
@@ -60,9 +60,9 @@ function renderClock(){const p=cp();clearInterval(tick);
   <div id="ckNew" class="hidden">${newProjectHtml()}</div>
   ${lastWrap&&lastWrap.pid===p.id&&!c?`<div class="set-note ck-done" role="status"><strong>✓ Päev salvestatud</strong><br>${escH(lastWrap.text)}<div class="actions" style="margin:12px 0 0"><button type="button" id="ckPreview" class="primary">Tee arve eelvaade</button><button type="button" id="ckNewProject">Alusta uut projekti</button></div></div>`:''}
   <details class="ck-opts" id="ckOpts"${p.job?'':' open'}><summary>Projekti valikud · ${p.job?escH(p.job)+' · '+escH(priceLabel(p)):'amet, hind, tööreeglid'}</summary><p class="help">Need valikud kehtivad selle projekti kohta: amet, hind, ületunnid ja tööreeglid (Reklaam 10 h, Film 12 h või oma valik). Muudatused salvestuvad nupuga „Salvesta hind ja reeglid” või kui vajutad „Alusta tööd”.</p><div id="ckOptsSlot"></div></details>
-  <div class="clock-face${c&&!c.pausedAt?' on':''}"><div class="clock-time" id="ckTime">${c?fmt(elapsed(c)):'00:00:00'}</div><div class="clock-sub">${c?(c.pausedAt?'Paus alates '+hm(new Date(c.pausedAt)):'Tööl alates '+hm(new Date(c.start))):'Pole tööl'}${c&&c.pauseSeconds?'<br>pausid kokku '+Math.round(c.pauseSeconds/60)+' min':''}</div></div>
-  <div class="clock-btns">${c?`<button id="ckPause">${c.pausedAt?'Jätka':'Paus'}</button><button id="ckWrap" class="primary">Wrap · lõpeta</button>`:`<button id="ckCall" class="primary wide">Call · alusta tööd</button>`}</div>
+  <div class="clock-face${c&&!c.pausedAt?' on':''}${c&&c.pausedAt?' paused':''}"><div class="clock-sub ck-state">${c?(c.pausedAt?'Paus alates '+hm(new Date(c.pausedAt)):'Tööl alates '+hm(new Date(c.start))):'Pole tööl'}</div><div class="clock-time" id="ckTime">${c?fmt(elapsed(c)):'00:00:00'}</div>${c&&c.pauseSeconds?'<div class="clock-sub">pausid kokku '+Math.round(c.pauseSeconds/60)+' min</div>':''}</div>
   ${c?`<div class="clock-field"><label for="ckComment">Kommentaar (valikuline)</label><input id="ckComment" maxlength="500" value="${escH(c.comment||'')}" placeholder="nt kolimine, lisatöö"></div>`:''}
+  <div class="clock-btns">${c?`<button id="ckPause">${c.pausedAt?'Jätka':'Paus'}</button><button id="ckWrap" class="primary">Wrap · lõpeta</button>`:`<button id="ckCall" class="primary wide">Call · alusta tööd</button>`}</div>
   <p class="error" id="ckError" role="alert"></p>
   <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<div class="row-item"><span>${escH(dayLabel(e.date))}<br>${escH(e.start)} → ${escH(e.end)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></div>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
   ${t?`<p class="help">Kokku ${h(t.mins)} · ${money(t.net)} ilma KM-ta.</p><div class="actions"><button type="button" id="ckPreview2">Vaata eelvaadet</button></div>`:''}</div></div>`;
@@ -252,11 +252,11 @@ const themeBtn=document.createElement('div');themeBtn.id='themeSwitch';themeBtn.
 themeBtn.innerHTML='<button type="button" data-t="light">Hele</button><button type="button" data-t="dark">Tume</button>';
 function markTheme(){const t=theme();themeBtn.querySelectorAll('button').forEach(b=>{b.classList.toggle('primary',b.dataset.t===t);b.setAttribute('aria-pressed',b.dataset.t===t)})}
 themeBtn.querySelectorAll('button').forEach(b=>b.onclick=()=>{setTheme(b.dataset.t);if(view==='settings')renderSettings()});
-bar.querySelector('.db-bar-in').insertBefore(themeBtn,bar.querySelector('.db-gear'));markTheme();
+markTheme();
 
 /* ---------- käivitus ---------- */
 // EN/ET valik rakenduse ribal.
-const moveLang=()=>{const l=$d('langSwitch');if(l)bar.querySelector('.db-bar-in').insertBefore(l,bar.querySelector('.db-gear'))};
+const moveLang=()=>{};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',moveLang);else moveLang();
 window.addEventListener('hourslangchange',()=>{try{if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')window.TraageldusInvoices.render()}catch(e){}});
 // Hoursi kliendi PDF ja kirjeldused: brändi nimi.
@@ -311,5 +311,22 @@ window.daybillRefresh=()=>{try{render()}catch(e){}if(view==='clock')renderClock(
 const run=document.createElement('p');run.className='help';run.id='dbRunning';$d('cloudStatus')&&$d('cloudStatus').after(run);
 function running(){const on=state.projects.filter(x=>!x.deleted&&x.clock);run.innerHTML=on.map(x=>`<strong>Tööl praegu:</strong> ${escH(x.name)} · alates ${hm(new Date(x.clock.start))}${x.clock.pausedAt?' (paus)':''} · ${fmt(elapsed(x.clock)).slice(0,5)} h`).join('<br>')}
 running();setInterval(running,30000);
+// Projekti päis: summa ja kaks põhinuppu (saada produtsendile, tee arve). Hoursi tuum joonistab ülejäänu.
+function decorate(){
+ document.querySelectorAll('#projects .project-meta').forEach(m=>{const n=m.firstChild;if(n&&n.nodeType===3){const x=n.nodeValue.replace(/^\s*·\s*/,'');if(x!==n.nodeValue)n.nodeValue=x}});
+ let proj=null;try{proj=projectExpanded?p():null}catch(e){}
+ let hero=$d('dbHero');const box=$d('approvalBox');
+ if(!proj||!box){hero&&hero.remove();return}
+ if(!hero){hero=document.createElement('div');hero.id='dbHero';hero.className='db-hero'}
+ if(hero.nextSibling!==box)box.before(hero);
+ let t=null;try{t=projectTotals(proj)}catch(e){}
+ const days=new Set((proj.entries||[]).map(e=>e.date)).size;
+ hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(t?t.gross:0)}</strong><span class="help">${[`ilma KM-ta ${money(t?t.net:0)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:[]).join(' · ')}</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-link" id="dbPdf">Salvesta PDF</button></div>`;
+ $d('dbSend').onclick=()=>{const b=$d('pdfMail');b&&b.click()};
+ $d('dbBill').onclick=()=>{const b=$d('invoiceTab');b&&b.click()};
+ $d('dbPdf').onclick=()=>{const b=$d('pdf');b&&b.click()}}
+let inRender=false;const coreList=window.renderProjectList;window.renderProjectList=function(){const r=coreList.apply(this,arguments);if(!inRender)try{decorate()}catch(e){console.error(e)}return r};
+const coreRender=window.render;window.render=function(){inRender=true;let r;try{r=coreRender.apply(this,arguments)}finally{inRender=false}try{decorate()}catch(e){console.error(e)}return r};
+try{decorate()}catch(e){}
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
