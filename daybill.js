@@ -73,8 +73,9 @@ function renderClock(){const p=cp();clearInterval(tick);
   <div class="clock-face${c&&!c.pausedAt?' on':''}${c&&c.pausedAt?' paused':''}"><div class="clock-sub ck-state">${c?(c.pausedAt?'Paus alates '+hm(new Date(c.pausedAt)):'Tööl alates '+hm(new Date(c.start))):'Pole tööl'}</div><div class="clock-time" id="ckTime">${c?fmt(elapsed(c)):'00:00:00'}</div>${c&&c.pauseSeconds?'<div class="clock-sub">pausid kokku '+Math.round(c.pauseSeconds/60)+' min</div>':''}</div>
   ${c?`<div class="clock-field"><label for="ckComment">Kommentaar (valikuline)</label><input id="ckComment" maxlength="500" value="${escH(c.comment||'')}" placeholder="nt kolimine, lisatöö"></div>`:''}
   <div class="clock-btns">${c?`<button id="ckPause">${c.pausedAt?'Jätka':'Paus'}</button><button id="ckWrap" class="primary">Wrap · lõpeta</button>`:`<button id="ckCall" class="primary wide">Call · alusta tööd</button>`}</div>
+  ${c?`<div class="ck-adjust"><button type="button" class="db-link" id="ckAdjIn">Muuda algusaega</button><button type="button" class="db-link" id="ckAdjOut">Lõpeta varasema ajaga</button></div><div id="ckAdjBox" class="ck-adjbox hidden"><label for="ckAdjT" id="ckAdjL"></label><div class="ck-adjrow"><input type="time" id="ckAdjT" required><button type="button" id="ckAdjOk" class="primary"></button><button type="button" id="ckAdjX">Tühista</button></div></div>`:''}
   <p class="error" id="ckError" role="alert"></p>
-  <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<div class="row-item"><span>${escH(dayLabel(e.date))}<br>${e.start?escH(e.start)+' → '+escH(e.end):escH(e.comment||(DAY_TYPES[e.dayType]||DAY_TYPES.custom).et)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></div>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
+  <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<button type="button" class="row-item ck-day" data-ck-edit="${escH(e.id)}" aria-label="Muuda päeva"><span>${escH(dayLabel(e.date))}<br>${e.start?escH(e.start)+' → '+escH(e.end):escH(e.comment||(DAY_TYPES[e.dayType]||DAY_TYPES.custom).et)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></button>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
   ${t?`<p class="help">Kokku ${h(t.mins)} · ${money(t.net)} ilma KM-ta.</p><div class="actions"><button type="button" id="ckPreview2">Vaata eelvaadet</button></div>`:''}</div></div>`;
  if(optForm){state.selected=p.id;try{render()}catch(e){}$d('ckOptsSlot').append(optForm)}
  $d('ckTipX')&&($d('ckTipX').onclick=()=>{setFlag(TOUR,null);renderClock()});$d('ckPreview')&&($d('ckPreview').onclick=()=>{if(lastWrap)setFlag(TOUR,null);openPreview(p.id)});$d('ckPreview2')&&($d('ckPreview2').onclick=()=>openPreview(p.id));
@@ -87,8 +88,24 @@ function renderClock(){const p=cp();clearInterval(tick);
  $d('ckPause')&&($d('ckPause').onclick=()=>{const c=p.clock;if(c.pausedAt){c.pauseSeconds=(c.pauseSeconds||0)+Math.round((Date.now()-Date.parse(c.pausedAt))/1000);delete c.pausedAt}else c.pausedAt=new Date().toISOString();save();renderClock()});
  $d('ckComment')&&($d('ckComment').oninput=e=>{p.clock.comment=e.target.value;save()});
  $d('ckWrap')&&($d('ckWrap').onclick=()=>wrap(p));
+ // Päeva peale vajutades avaneb see eelvaates muutmiseks.
+ clockView.querySelectorAll('[data-ck-edit]').forEach(b=>b.onclick=()=>{const id=b.dataset.ckEdit;openPreview(p.id);setTimeout(()=>{const ed=document.querySelector(`#hoursView [data-edit="${CSS.escape(id)}"]`);if(ed)ed.click()},120)});
+ // Unustasid kella õigel ajal käivitada või peatada: algus- ja lõpuaega saab parandada.
+ let adj=null;const adjOpen=k=>{adj=k;const c=p.clock;$d('ckError').textContent='';$d('ckAdjBox').classList.remove('hidden');$d('ckAdjL').textContent=k==='in'?'Tegelik algusaeg (Call)':'Tegelik lõpuaeg (Wrap)';$d('ckAdjOk').textContent=k==='in'?'Salvesta algusaeg':'Lõpeta selle ajaga';$d('ckAdjT').value=hm(k==='in'?new Date(c.start):new Date());$d('ckAdjT').focus()};
+ $d('ckAdjIn')&&($d('ckAdjIn').onclick=()=>adjOpen('in'));$d('ckAdjOut')&&($d('ckAdjOut').onclick=()=>adjOpen('out'));
+ $d('ckAdjX')&&($d('ckAdjX').onclick=()=>{adj=null;$d('ckAdjBox').classList.add('hidden')});
+ $d('ckAdjOk')&&($d('ckAdjOk').onclick=()=>{const c=p.clock,v=$d('ckAdjT').value,err=$d('ckError');err.textContent='';
+  if(!/^\d\d:\d\d$/.test(v)){err.textContent='Vali kellaaeg, näiteks 08:00.';return}const [H,M]=v.split(':').map(Number),now=new Date();
+  if(adj==='in'){const d=new Date(now);d.setHours(H,M,0,0);if(d>now)d.setDate(d.getDate()-1);
+   if(c.pausedAt&&Date.parse(c.pausedAt)<d){err.textContent='Paus algas enne seda aega. Jätka enne tööd ja proovi siis uuesti.';return}
+   const clash=(p.entries||[]).find(x=>x.start&&x.end&&Date.parse(shiftEndDate(x)+'T'+x.end)>d&&Date.parse(x.date+'T'+x.start)<now);
+   if(clash){err.textContent=`See aeg kattub juba salvestatud tööpäevaga: ${clash.date.split('-').reverse().join('.')} ${clash.start} → ${clash.end}.`;return}
+   c.start=d.toISOString();save();renderClock();return}
+  const st=new Date(c.start),d=new Date(st);d.setHours(H,M,0,0);if(d<=st)d.setDate(d.getDate()+1);
+  if(d>now){err.textContent='Lõpuaeg ei saa olla tulevikus. Kui töö veel käib, vajuta hiljem „Wrap · lõpeta”.';return}
+  wrap(p,false,d)});
  if(c)tick=setInterval(()=>{const el=$d('ckTime');if(!el||view!=='clock'){clearInterval(tick);return}el.textContent=fmt(elapsed(p.clock))},1000)}
-function wrap(p,quiet){const c=p.clock;if(!c)return false;const end=new Date(),start=new Date(c.start);let pause=(c.pauseSeconds||0)+(c.pausedAt?Math.round((end-Date.parse(c.pausedAt))/1000):0);
+function wrap(p,quiet,endAt){const c=p.clock;if(!c)return false;const end=endAt?new Date(endAt):new Date(),start=new Date(c.start);let pause=(c.pauseSeconds||0)+(c.pausedAt?Math.max(0,Math.round((end-Date.parse(c.pausedAt))/1000)):0);
  const e={id:(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:ymd(start),endDate:ymd(end),start:hm(start),end:hm(end),comment:(c.comment||'').trim(),job:p.job,rate:p.rate,source:'Daybill kell',breaks:Math.round(pause/60)||undefined};
  const worked=end-start-pause*1000,drop=()=>{delete p.clock;save();renderClock();return true};
  if(worked<60000){if(!confirm('Tööd oli alla minuti, seda ei saa salvestada. Kas lõpetan ilma salvestamata?'))return false;return drop()}
@@ -404,6 +421,19 @@ function decorate(){
  $d('dbSend').onclick=()=>{const b=$d('pdfMail');b&&b.click()};
  $d('dbBill').onclick=()=>{const b=$d('invoiceTab');b&&b.click()};
  $d('dbPdf').onclick=()=>{const b=$d('pdf');b&&b.click()}}
+// „Mitu tundi?”: vali tundide arv, lõpuaeg arvutatakse alguse järgi (telefonis kerimisratas).
+(function hoursPicker(){const g=document.querySelector('#entry .entry-grid');if(!g||$d('dbHrs'))return;
+ const box=document.createElement('div');box.className='db-hrs';
+ let o='<option value="">–</option>';for(let i=1;i<=48;i++){const v=i/2;o+=`<option value="${v}">${String(v).replace('.',',')} h</option>`}
+ box.innerHTML=`<label for="dbHrs">Mitu tundi? Vali ja lõpuaeg arvutatakse ise</label><select id="dbHrs">${o}</select>`;g.after(box);
+ const sel=$d('dbHrs'),f=id=>$d(id),fire=el=>{el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};
+ const span=()=>{const d=f('date').value,s=f('start').value,ed=f('endDate').value||d,e=f('end').value;if(!d||!s||!e)return null;let m=(Date.parse(ed+'T'+e+'Z')-Date.parse(d+'T'+s+'Z'))/60000;if(m<=0&&ed===d)m+=1440;return m>0?m:null};
+ const sync=()=>{const m=span();const v=m&&m%30===0&&m<=1440?String(m/60):'';if(sel.value!==v)sel.value=[...sel.options].some(x=>x.value===v)?v:''};
+ sel.onchange=()=>{const h=Number(sel.value);if(!h)return;if(!f('date').value){f('date').value=ymd(new Date());fire(f('date'))}if(!f('start').value){f('start').value='08:00';fire(f('start'))}
+  const t=new Date(Date.parse(f('date').value+'T'+f('start').value+'Z')+h*3600e3);const iso=t.toISOString();f('end').value=iso.slice(11,16);fire(f('end'));f('endDate').value=iso.slice(0,10);fire(f('endDate'))};
+ for(const id of ['date','start','end','endDate'])f(id)&&f(id).addEventListener('input',sync);
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-edit],#cancelEdit,#save'))setTimeout(sync,50)},true);sync();
+ const relabel=()=>{const en=(window.HoursI18n&&window.HoursI18n.lang)==='en';for(const x of sel.options)if(x.value)x.textContent=(en?x.value:x.value.replace('.',','))+' h'};relabel();window.addEventListener('hourslangchange',relabel)})();
 let inRender=false;const coreList=window.renderProjectList;window.renderProjectList=function(){const r=coreList.apply(this,arguments);if(!inRender)try{decorate()}catch(e){console.error(e)}return r};
 const coreRender=window.render;window.render=function(){inRender=true;let r;try{r=coreRender.apply(this,arguments)}finally{inRender=false}try{decorate()}catch(e){console.error(e)}return r};
 try{decorate()}catch(e){}

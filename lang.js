@@ -1741,7 +1741,19 @@ const EN=/*EN-START*/{
 "Sinu projektid on praegu ainult selles seadmes. Loo Seadetes tasuta konto, siis ava uus aadress ja logi sama kontoga sisse: kõik tuleb kaasa.":"Your projects are only on this device right now. Create a free account in Settings, then open the new address and sign in with the same account: everything comes with you.",
 "iPhone: ava see leht Safaris → Jaga → „Lisa avakuvale”. Android: Chrome'is menüü ⋮ → „Installi rakendus” või „Lisa avakuvale”. Arvutis: Chrome'is või Edge'is aadressiriba paremas otsas „Installi”, Macis Safaris Fail → „Lisa Docki”. Paigaldamata töötab Daybill ka igas brauseris. See töötab ka ilma internetita; muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.":"iPhone: open this page in Safari → Share → “Add to Home Screen”. Android: in Chrome, menu ⋮ → “Install app” or “Add to Home screen”. Computer: in Chrome or Edge, “Install” at the right end of the address bar; on a Mac in Safari, File → “Add to Dock”. Without installing, Daybill works in any browser too. It also works offline; changes reach your other devices when the connection is back.",
 "Lisa Daybill oma avakuvale: vajuta brauseri menüüd ⋮ ja vali „Installi” või „Lisa avakuvale”.":"Add Daybill to your home screen: tap the browser menu ⋮ and choose “Install” or “Add to Home screen”.",
-"Lisa Daybill oma avakuvale: vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.":"Add Daybill to your home screen: tap the menu ⋮ at the top right and choose “Install app” or “Add to Home screen”."
+"Lisa Daybill oma avakuvale: vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.":"Add Daybill to your home screen: tap the menu ⋮ at the top right and choose “Install app” or “Add to Home screen”.",
+"Muuda algusaega":"Change start time",
+"Lõpeta varasema ajaga":"Wrap at an earlier time",
+"Tegelik algusaeg (Call)":"Actual start time (Call)",
+"Tegelik lõpuaeg (Wrap)":"Actual end time (Wrap)",
+"Salvesta algusaeg":"Save start time",
+"Lõpeta selle ajaga":"Wrap at this time",
+"Vali kellaaeg, näiteks 08:00.":"Pick a time, for example 08:00.",
+"Paus algas enne seda aega. Jätka enne tööd ja proovi siis uuesti.":"Your break started before that time. Resume work first, then try again.",
+"See aeg kattub juba salvestatud tööpäevaga ({0} {1} → {2}).":"That time overlaps a day you already saved ({0} {1} → {2}).",
+"Lõpuaeg ei saa olla tulevikus. Kui töö veel käib, vajuta hiljem „Wrap · lõpeta”.":"The end time can’t be in the future. If you’re still working, tap “Wrap · finish” later.",
+"See aeg kattub juba salvestatud tööpäevaga: {0} {1} → {2}.":"That time overlaps a day you already saved: {0} {1} → {2}.",
+"Mitu tundi? Vali ja lõpuaeg arvutatakse ise":"How many hours? Pick one and the end time is set for you"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
@@ -1749,7 +1761,7 @@ const MONTHS_EN=['January','February','March','April','May','June','July','Augus
 const MONTH_RE=new RegExp('\\b('+MONTHS.join('|')+')\\b','gi');
 const ws=s=>s.replace(/\s+/g,' ').trim();
 // Tühik malli augu ja sõna vahel on kohustuslik (muidu „· {0} p” tõlgiks kasutaja teksti „Valguse prep”).
-const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/^\s+(?=[A-Za-zÀ-ž0-9])/,'\u0001').replace(/(?<=[A-Za-zÀ-ž0-9])\s+$/,'\u0001').replace(/^\s+|\s+$/g,'\u0000').replace(/\s+/g,'\\s+').replace(/\u0000/g,'\\s*').replace(/\u0001/g,'\\s+');
+const esc=s=>/^\s+$/.test(s)?'\\s+':s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/^\s+(?=[A-Za-zÀ-ž0-9])/,'\u0001').replace(/(?<=[A-Za-zÀ-ž0-9])\s+$/,'\u0001').replace(/^\s+|\s+$/g,'\u0000').replace(/\s+/g,'\\s+').replace(/\u0000/g,'\\s*').replace(/\u0001/g,'\\s+');
 const exact=new Map(),buckets=new Map(),loose=[];
 for(const [et,en] of Object.entries(EN)){
  if(!/\{\d+\}/.test(et)){exact.set(ws(et),en);continue}
@@ -1762,7 +1774,7 @@ const merged=new Map();
 function candidates(key){let l=merged.get(key);if(!l){l=[...(buckets.get(key)||[]),...loose].sort((a,b)=>b.size-a.size);merged.set(key,l)}return l}
 function viaPattern(s,depth){const t=s.trim(),key=t.slice(0,3).toLowerCase();
  for(const p of candidates(key)){if(p.tail&&!t.endsWith(p.tail)&&!ws(t).endsWith(p.tail))continue;const m=t.match(p.re);if(!m)continue;if(!p.dot&&m.slice(1).some(v=>v&&v.includes(' · ')))continue;
-  const vals=[];p.holes.forEach((n,i)=>vals[n]=m[i+1]);return p.en.replace(/\{(\d+)\}/g,(x,n)=>tr(vals[n]??'',depth+1))}
+  const vals=[];p.holes.forEach((n,i)=>vals[n]=m[i+1]);return p.en.replace(/\{(\d+)\}/g,(x,n)=>{const v=vals[n]??'';let o=String(tr(v,depth+1));if(!/^\s/.test(v))o=o.replace(/^\s+/,'');if(!/\s$/.test(v))o=o.replace(/\s+$/,'');return o})}
  return null}
 // Tõlgib ühe ekraaniteksti; tundmatu tekst (nt kasutaja andmed) jääb muutmata.
 const memo=new Map();

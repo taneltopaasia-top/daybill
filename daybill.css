@@ -333,3 +333,18 @@ td,th{border-bottom-color:var(--line)}
 /* Kitsas telefon (320 px): menüü ja kellaajad mahuvad */
 @media(max-width:650px){.db-nav{grid-template-columns:repeat(4,minmax(0,1fr))}.db-nav button{min-width:0}.db-nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis}.entry-grid>*{min-width:0}.entry-grid input{min-width:0;width:100%}}
 @media(max-width:360px){.db-nav button{font-size:10.5px;padding:6px 1px}}
+/* Projekti rida: hõljutades ja vajutades jääb tekst loetavaks */
+#projects .project-toggle:hover,#projects .project-toggle:active,#projects .project-toggle:focus{background:var(--card);color:var(--fg)}
+#projects .project-toggle.active,#projects .project-toggle.active:hover,#projects .project-toggle.active:active,#projects .project-toggle.active:focus{background:var(--fg);color:var(--bg)}
+.db-hist-card,.db-hist-card:hover{color:var(--fg)}
+/* Algus- ja lõpuaja parandus */
+.ck-adjust{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 0}
+.ck-adjbox{margin:12px 0 0;padding:14px;background:var(--card)}
+.ck-adjrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}.ck-adjrow input{flex:1 1 120px;min-width:0}
+/* Kella päevad on vajutatavad (avab muutmise) */
+button.ck-day{width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:var(--fg);text-align:left;font-weight:400;min-height:0;padding:12px 0;cursor:pointer;align-items:flex-start}
+button.ck-day:hover,button.ck-day:active{background:var(--card);color:var(--fg)}
+button.ck-day span:last-child{text-align:right}
+button.ck-day span:first-child::after{content:" ›";color:var(--muted)}
+/* Mitu tundi? */
+.db-hrs{margin-top:14px}.db-hrs select{width:100%;max-width:260px}

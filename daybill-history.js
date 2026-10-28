@@ -70,7 +70,7 @@ function render(){place();const ps=projects().filter(p=>!p.deleted),inv=invoices
  ${list.length>limit?`<button type="button" id="dhMore">Näita rohkem</button>`:''}`;
  view.querySelectorAll('[data-hf]').forEach(b=>b.onclick=()=>{filter=b.dataset.hf;limit=100;render()});
  const more=$('dhMore');if(more)more.onclick=()=>{limit+=200;render()};
- $('dhProjects').onclick=()=>window.daybillShow('hours');
+ $('dhProjects').onclick=()=>window.daybillAllProjects?window.daybillAllProjects():window.daybillShow('hours');
  $('dhInvoices').onclick=()=>{try{window.TraageldusInvoices.setTab('list')}catch(e){}window.daybillShow('inv')};
  $('dhBank').onclick=()=>{try{window.TraageldusInvoices.setTab('list')}catch(e){}window.daybillShow('inv')};
  view.querySelectorAll('[data-go-p]').forEach(b=>b.onclick=()=>{const p=projects().find(x=>x.id===b.dataset.goP);if(!p)return;try{state.selected=p.id;archiveView=!!p.archived;projectExpanded=true;save()}catch(e){}window.daybillShow('hours');const t=document.querySelector('.project-toggle.active');t&&t.scrollIntoView({block:'start'})});
