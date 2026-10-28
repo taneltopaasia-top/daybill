@@ -34,14 +34,14 @@ const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],[
 // Projekti valikud (Hoursi seadete vorm) on kellas; eelvaates tagasi oma kohal.
 const optForm=$d('settings');
 // Eelvaates on valikud kokku pandud, et ülevaade jääks lihtne.
-const pvOpts=document.createElement('details');pvOpts.className='ck-opts';pvOpts.innerHTML='<summary>Projekti valikud · amet, hind, tööreeglid</summary>';
+const pvOpts=document.createElement('details');pvOpts.className='ck-opts';pvOpts.id='dbPvOpts';pvOpts.innerHTML='<summary><span class="db-po-t">Projekti valikud</span><span class="db-po-s" id="dbPoS">amet, hind, tööreeglid</span></summary>';
 if(optForm){optForm.parentNode.insertBefore(pvOpts,optForm);pvOpts.append(optForm)}
 const optHome={parent:pvOpts,next:null};
 function optBack(){if(optForm&&optForm.parentNode!==optHome.parent)optHome.parent.insertBefore(optForm,optHome.next)}
 function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum')}catch(e){}}view=VIEWS.some(x=>x[0]===v)?v:'clock';if(view!=='clock')optBack();for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.toggle('hidden',k!==view)}
  bar.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('primary',b.dataset.view===view);b.toggleAttribute('aria-current',b.dataset.view===view)});
  try{localStorage.setItem(VIEW_KEY,view)}catch(e){}
- if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}if(view==='hours')try{render()}catch(e){}if(view==='history')try{window.daybillHistory()}catch(e){console.error(e)}
+ if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{const T=window.TraageldusInvoices,c=cp();if(c&&(c.entries||[]).length&&c.job)T.autoProject(c.id);T.render()}catch(e){}if(view==='hours')try{render()}catch(e){}if(view==='history')try{window.daybillHistory()}catch(e){console.error(e)}
  window.scrollTo(0,0)}
 window.daybillShow=show;
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#ckAll,#dbAllProj');if(t){e.preventDefault();allProjects()}});
@@ -425,6 +425,7 @@ function decorate(){
  document.querySelectorAll('#projects .project-meta').forEach(m=>{const n=m.firstChild;if(n&&n.nodeType===3){const x=n.nodeValue.replace(/^\s*·\s*/,'');if(x!==n.nodeValue)n.nodeValue=x}});
  let proj=null;try{proj=projectExpanded?p():null}catch(e){}
  let hero=$d('dbHero');const box=$d('approvalBox');
+ {const ps=$d('dbPoS');if(ps&&proj){let R=null;try{R=rulesOf(proj)}catch(e){}ps.textContent=proj.job?[proj.job,priceLabel(proj),R?(R.set==='film'?'Film':R.set==='commercial'?'Reklaam':'Oma reeglid')+' '+R.day+' h':''].filter(Boolean).join(' · '):'Lisa amet ja hind';const po=$d('dbPvOpts');if(po&&!proj.job)po.open=true}}
  if(!proj||!box){hero&&hero.remove();return}
  if(!hero){hero=document.createElement('div');hero.id='dbHero';hero.className='db-hero'}
  if(hero.nextSibling!==box)box.before(hero);
@@ -432,12 +433,15 @@ function decorate(){
  let io=null;try{io=invoiceOnly(proj)}catch(e){}
  let days=0;try{days=workDays(proj,io)}catch(e){days=new Set((proj.entries||[]).map(e=>e.date)).size}
  const gross=io?io.gross:t?t.gross:0,net=io?io.net:t?t.net:0;
- hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(gross)}</strong><span class="help">${[`ilma KM-ta ${money(net)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:io?['tunnid teadmata']:[]).join(' · ')}</span><span class="help">Produtsent saab tööaja ja kulude ülevaate (PDF).</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-addday" id="dbAddDay">+ Lisa päev · prep, võttepäev või muu</button><button type="button" class="db-link" id="dbPdf">Salvesta tööaja ja kulude ülevaade (PDF)</button></div>`;
- $d('dbAddDay').onclick=()=>dayDialog(proj);
- {const dh=$d('daysHeading');if(dh&&!$d('dbAddDay2')){const b=document.createElement('button');b.type='button';b.id='dbAddDay2';b.className='db-addday2';b.textContent='+ Lisa päev';dh.append(b)}const b2=$d('dbAddDay2');if(b2)b2.onclick=e=>{e.preventDefault();dayDialog(proj)}}
- $d('dbSend').onclick=()=>{const b=$d('pdfMail');b&&b.click()};
- $d('dbBill').onclick=()=>{const b=$d('invoiceTab');b&&b.click()};
+ hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(gross)}</strong><span class="help">${[`ilma KM-ta ${money(net)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:io?['tunnid teadmata']:[]).join(' · ')}</span></div><div class="db-hero-btns"><button type="button" class="primary db-pdf" id="dbPdf">Salvesta tööaja ja kulude ülevaade (PDF)</button></div></div>`;
+ {const l=$d('dbPrep');if(l)l.onclick=()=>dayDialog(proj)}
  $d('dbPdf').onclick=()=>{const b=$d('pdf');b&&b.click()}}
+// Arvete all: tööaja ülevaade produtsendile (PDF e-postiga), projekt valitud ise.
+let sendPid='';
+window.daybillSendBox=()=>{const list=active().filter(x=>(x.entries||[]).length);if(!list.length)return '';const c=cp();if(!list.some(x=>x.id===sendPid))sendPid=c&&list.some(x=>x.id===c.id)?c.id:list[0].id;
+ return `<div class="db-send"><label for="dbSendP">Tööaja ülevaade produtsendile</label><div class="db-send-row"><select id="dbSendP">${list.map(x=>`<option value="${escH(x.id)}"${x.id===sendPid?' selected':''}>${escH(x.name)}</option>`).join('')}</select><button type="button" class="primary" id="dbSendGo">Saada produtsendile</button></div></div>`};
+window.daybillSendBind=()=>{const sel=$d('dbSendP'),go=$d('dbSendGo');if(!sel||!go)return;sel.onchange=()=>{sendPid=sel.value};
+ go.onclick=()=>{const id=sel.value;if(!state.projects.some(x=>x.id===id))return;state.selected=id;try{render()}catch(e){}const b=$d('pdfMail');b&&b.click()}};
 // „Mitu tundi?”: vali tundide arv, lõpuaeg arvutatakse alguse järgi (telefonis kerimisratas).
 (function hoursPicker(){const g=document.querySelector('#entry .entry-grid');if(!g||$d('dbHrs'))return;
  const box=document.createElement('div');box.className='db-hrs';
@@ -451,8 +455,42 @@ function decorate(){
  for(const id of ['date','start','end','endDate'])f(id)&&f(id).addEventListener('input',sync);
  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-edit],#cancelEdit,#save'))setTimeout(sync,50)},true);sync();
  const relabel=()=>{const en=(window.HoursI18n&&window.HoursI18n.lang)==='en';for(const x of sel.options)if(x.value)x.textContent=(en?x.value:x.value.replace('.',','))+' h'};relabel();window.addEventListener('hourslangchange',relabel)})();
+// Tööpäeva lisamine: kuupäev → algus → lõpp (või tundide arv) → Lisa. Lõpu kuupäev tuleb ise, harvad väljad on peidus.
+(function simpleEntry(){const form=$d('entry');if(!form||form.dataset.simple)return;form.dataset.simple='1';
+ const sec=form.closest('.section'),h=sec&&sec.querySelector('h2');if(h)h.textContent='Lisa tööpäev';
+ const grid=form.querySelector('.entry-grid'),ed=$d('endDate'),hrs=document.querySelector('.db-hrs');
+ if(ed)ed.closest('div').classList.add('db-hide');
+ if(grid&&hrs){hrs.classList.add('db-hrs-in');grid.append(hrs);const l=hrs.querySelector('label');if(l)l.textContent='Tunde'}
+ const lab=(id,t)=>{const l=form.querySelector(`label[for="${id}"]`);if(l)l.textContent=t};lab('date','Kuupäev');lab('comment','Kommentaar (valikuline)');
+ // Lõpu kuupäev: kui lõpp on enne algust või sama, lõppes töö järgmisel päeval.
+ const auto=()=>{const d=$d('date').value,a=$d('start').value,b=$d('end').value;if(!d||!a||!b)return;const want=b<=a?addDays(d,1):d;if(ed.value!==want){ed.value=want}};
+ for(const id of ['date','start','end'])$d(id).addEventListener('input',auto);for(const id of ['date','start','end'])$d(id).addEventListener('change',auto);
+ const help=[...form.querySelectorAll(':scope > p.help')];help.forEach(p=>p.classList.add('db-hide'));
+ // Lõuna, pausid ja päeva liik (tööreeglitega projektis) ühe vajutuse taga.
+ const re=$d('ruleEntry');if(re){const d=document.createElement('details');d.className='db-more db-rules';d.innerHTML='<summary>Lõuna, pausid ja päeva liik</summary>';re.before(d);d.append(re)}
+ // Prep või muu päev kindla summaga: lühike link vormi all.
+ const acts=$d('add')&&$d('add').parentElement;if(acts&&!$d('dbPrep')){const b=document.createElement('button');b.type='button';b.id='dbPrep';b.className='db-link';b.textContent='Prep või muu päev kindla summaga';acts.append(b)}
+ $d('add').textContent='Lisa päev';$d('nextDay').classList.add('db-hide');
+ // Pärast lisamist on järgmine päev kohe valmis (samad kellaajad).
+ const core=form.onsubmit;form.onsubmit=ev=>{const pr=p(),n=pr?(pr.entries||[]).length:0,was=typeof editing!=='undefined'&&editing;core(ev);
+  if(pr&&!was&&(pr.entries||[]).length>n){$d('nextDay').click();$d('add').textContent='Lisa päev';$d('entryError').textContent='✓ Päev lisatud. Järgmine päev on valmis.'}};
+ // Kulud: ühe vajutuse taga, kui neid veel pole.
+ const cs=$d('costsSection'),ch=cs&&cs.querySelector('h2'),cf=$d('costForm');if(cs&&ch&&cf&&!$d('dbCostMore')){const d=document.createElement('details');d.id='dbCostMore';d.className='db-more db-costs';d.innerHTML='<summary>+ Lisa kulu (nt kaamera rent, sõit)</summary>';cf.before(d);d.append(cf);cf.querySelectorAll('p.help').forEach(p=>p.classList.add('db-hide'));ch.textContent='Lisakulud'}
+ const cl=$d('costs');cl&&cl.addEventListener('click',e=>{if(e.target.closest('button')){const d=$d('dbCostMore');if(d)d.open=true}},true);
+ const watch=()=>{form.toggleAttribute('data-touched',true)};form.addEventListener('input',watch,{once:true})})();
+// „Lisa päev” nupu tekst jääb samaks ka pärast muutmist.
+(function(){const add=$d('add');if(!add)return;new MutationObserver(()=>{const t=add.textContent;if(t==='Lisa tunnid'||t==='Add hours')add.textContent='Lisa päev'}).observe(add,{childList:true,characterData:true,subtree:true})})();
 let inRender=false;const coreList=window.renderProjectList;window.renderProjectList=function(){const r=coreList.apply(this,arguments);if(!inRender)try{decorate()}catch(e){console.error(e)}return r};
 const coreRender=window.render;window.render=function(){inRender=true;let r;try{r=coreRender.apply(this,arguments)}finally{inRender=false}try{decorate()}catch(e){console.error(e)}return r};
 try{decorate()}catch(e){}
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+// Uuendused jõuavad kasutajani ise: äpp kontrollib uut versiooni avamisel, telefonis äppi naastes ja iga 30 min järel.
+// Kui uus versioon on olemas, laaditakse äpp vaikselt uuesti (andmed ja sisselogimine jäävad alles). Pooleli olevat sisestust ei katkestata.
+if('serviceWorker' in navigator&&location.protocol==='https:'){let had=!!navigator.serviceWorker.controller,pending=false;
+ const busy=()=>{const a=document.activeElement;return !!(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||!!document.querySelector('dialog[open],.db-wiz')};
+ const reload=()=>{if(busy()){pending=true;return}pending=false;location.reload()};
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had){had=true;return}reload()});
+ navigator.serviceWorker.register('sw.js').then(reg=>{const check=()=>reg.update().catch(()=>{});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check();else if(pending)location.reload()});
+  setInterval(check,30*60e3)}).catch(()=>{});
+ document.addEventListener('focusout',()=>{if(pending)setTimeout(()=>{if(pending&&!busy())reload()},1500)})}
 })();

@@ -389,3 +389,52 @@ button:active:not(:disabled){transform:translateY(1px)}
 /* Eelvaates on projekt üksi: pealkiri rahulik, mitte valge riba */
 #hoursView.db-focus #projects .project-toggle.active,#hoursView.db-focus #projects .project-toggle.active:hover,#hoursView.db-focus #projects .project-toggle.active:focus{background:none;color:var(--fg);padding-left:0;padding-right:0}
 #hoursView.db-focus #projects .project-toggle.active .project-meta{color:var(--muted);opacity:1}
+/* v29 eelvaade: üks peamine tegevus, suured valikud, kompaktne päeva lisamine */
+.db-hide{display:none!important}
+#hoursView #approvalBox,#hoursView.db-focus #summary,#hoursView.db-focus #invoicedNote:empty{display:none!important}
+#hoursView.db-focus #hoursStage > p.help:last-child{display:none}
+.db-hero{padding:24px}
+.db-hero-btns{display:block;margin-top:18px}
+.db-hero-btns .db-pdf{width:100%;min-height:60px;font-size:18px;font-weight:700}
+#dbPvOpts{margin:16px 0 8px;border:1px solid var(--line);background:var(--card)}
+#dbPvOpts>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:20px 52px 20px 20px;position:relative}
+#dbPvOpts>summary::-webkit-details-marker{display:none}
+#dbPvOpts>summary::after{content:'';position:absolute;right:22px;top:50%;width:10px;height:10px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-70%) rotate(45deg);transition:transform .2s ease}
+#dbPvOpts[open]>summary::after{transform:translateY(-30%) rotate(-135deg)}
+.db-po-t{font-size:20px;font-weight:700;letter-spacing:-.2px}
+.db-po-s{font-size:16px;color:var(--muted)}
+#dbPvOpts #settings{padding:0 20px 20px}
+#dbPvOpts #settings label{font-size:14px}
+#dbPvOpts #settings input,#dbPvOpts #settings select{min-height:50px;font-size:17px}
+#entry .entry-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.db-hrs-in{margin:0}
+.db-hrs-in select{width:100%}
+#entry .actions{align-items:center;gap:14px}
+#entry #add{min-width:150px;min-height:50px;font-weight:700}
+#entry:not([data-touched]) #preview{visibility:hidden}
+.db-rules{margin:12px 0 4px}
+.db-costs{margin:4px 0 12px}
+.db-costs>summary{font-size:16px;color:var(--fg)}
+.db-costs>summary::after{content:''}
+.db-send{border:1px solid var(--line);background:var(--card);padding:16px;margin:0 0 20px}
+.db-send label{display:block;font-size:14px;margin-bottom:8px}
+.db-send-row{display:grid;grid-template-columns:1fr auto;gap:10px}
+.db-send-row button{white-space:nowrap}
+@media(max-width:650px){
+ #entry .entry-grid{grid-template-columns:1fr 1fr}
+ .db-send-row{grid-template-columns:1fr}
+ .db-hero{padding:18px}
+}
+#entry:not([data-touched]) #preview{display:none}
+#entryError:empty{display:none}
+#hoursView .day{border:0;border-bottom:1px solid var(--line);padding:14px 0;margin:0;background:none}
+#hoursView .day .table{border:0;margin:6px 0 0}
+#hoursView .day thead{display:none}
+#hoursView .day td:nth-last-child(2){display:none}
+#hoursView .day td{border:0;padding:4px 8px 4px 0;vertical-align:middle}
+#hoursView .day-heading{border:0;padding:0;font-size:16px}
+#hoursView .day td:not(:first-child):not(:nth-child(2)):not(:last-child){display:none}
+#hoursView .day td:first-child{width:100%}
+#hoursView .day td:nth-child(2){white-space:nowrap;padding-right:16px}
+#hoursView .day-heading{font-size:15px}
+#hoursView .day-heading span:last-child{color:var(--muted);font-weight:400}

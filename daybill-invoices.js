@@ -168,12 +168,13 @@ function alertBox(t){alert(t)}
 let root=null;
 function mount(){root=document.createElement('section');root.id='invView';root.className='db-view hidden';document.querySelector('main').append(root)}
 function render(){if(!root)return;const c=computed(),errs=integrity();const open=live().filter(x=>!x.credit&&!x.paidAt&&!x.paid&&!credited(x)),over=open.filter(x=>x.due<isoToday());
- root.innerHTML=`<div class="row top"><h1>Arved</h1></div>
+ root.innerHTML=`<div class="row top"><h1>Arved</h1></div>${window.daybillSendBox?window.daybillSendBox():''}
  ${!live().length?'':`<div class="inv-strip">${open.length?`Ootab makset ${open.length} arvet · ${eurUi(open.reduce((s,x)=>s+x.gross,0))}${over.length?` · <strong>üle tähtaja ${over.length}</strong>`:''}`:'Kõik arved on makstud.'}</div>`}
  ${errs.length?`<div class="inv-warn"><strong>Registris on viga.</strong><br>${errs.map(escH).join('<br>')}</div>`:''}
  ${msg?`<div class="inv-warn" role="status">${msg}</div>`:''}
  <nav class="actions inv-tabs"><button data-tab="new" class="${tab==='new'?'primary':''}">Uus arve</button><button data-tab="list" class="${tab==='list'?'primary':''}">Arhiiv</button><button data-tab="sum" class="${tab==='sum'?'primary':''}">Kokkuvõte</button><button data-tab="tpl" class="${tab==='tpl'?'primary':''}">Arvepõhi</button></nav>
  ${tab==='new'&&admin()?adminHtml():tab==='new'?newHtml(c):tab==='list'?listHtml():'<div id="invExtra"></div>'}`;
+ try{window.daybillSendBind&&window.daybillSendBind()}catch(e){}
  root.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;msg='';render()});
  if(tab==='new'&&admin()){const b=$i('invGoList');if(b)b.onclick=()=>{tab='list';msg='';render()}}else if(tab==='new')bindNew();else if(tab==='list')bindList();else try{window.daybillInvExtra(tab,$i('invExtra'))}catch(e){console.error(e)}}
 function adminHtml(){const n=live().filter(x=>x.fromHours).length;
@@ -244,7 +245,7 @@ function purgeable(){const t=isoToday();return live().filter(x=>keepUntil(x)<=t)
 function purge(ids){const set=new Set(ids),ok=new Set(purgeable().map(x=>x.id)),ch=[];list=list.map(x=>{if(set.has(x.id)&&ok.has(x.id)){const t=tomb(x);ch.push(t);return t}return x});saveList(ch);render();return ch.length}
 function receive(remote){let changed=false;for(let r of remote){const i=list.findIndex(x=>x.id===r.id);if(r.deleted&&i>=0)r=tomb(list[i],r._u);if(i<0){list.push(r);changed=true}else if((r._u||0)>(list[i]._u||0)){list[i]=r;changed=true}}if(changed){try{localStorage.setItem(INV_KEY,JSON.stringify(list))}catch(e){}render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}return changed}
 
-window.TraageldusInvoices={setTab(t){tab=t;msg='';render()},markPaid(id,date,ref){const x=list.find(v=>v.id===id);if(!x||x.deleted||x.fromHours||x.credit||x.paidAt||x.paid||credited(x))return false;update(x,{paidAt:date||isoToday(),paidRef:ref||null});return true},purgeable,purge,keepUntil,list:()=>live().map(x=>JSON.parse(JSON.stringify(x))),all:()=>list,forProject,showView:show,fromProject,renderApproved(){},refreshProjects(){},credited,status,invoicePdf,amountWords,nextNumber,integrity,receive,render};
+window.TraageldusInvoices={setTab(t){tab=t;msg='';render()},autoProject(pid){if(admin()||draft.hoursProject||draft.client.name||!pid||!projectById(pid)||forProject(pid).length)return;fromProject(pid)},markPaid(id,date,ref){const x=list.find(v=>v.id===id);if(!x||x.deleted||x.fromHours||x.credit||x.paidAt||x.paid||credited(x))return false;update(x,{paidAt:date||isoToday(),paidRef:ref||null});return true},purgeable,purge,keepUntil,list:()=>live().map(x=>JSON.parse(JSON.stringify(x))),all:()=>list,forProject,showView:show,fromProject,renderApproved(){},refreshProjects(){},credited,status,invoicePdf,amountWords,nextNumber,integrity,receive,render};
 window.DaybillSettings={get:()=>settings,save:saveSettings,ready:sellerReady,DEFAULT:SETTINGS_DEFAULT};
 mount();render();
 })();

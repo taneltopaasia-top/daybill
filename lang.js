@@ -1495,7 +1495,7 @@ const EN=/*EN-START*/{
 "Vaata eelvaadet":"View preview",
 "Projekti valikud · {0}":"Project options · {0}",
 "Projekti valikud · amet, hind, tööreeglid":"Project options · role, rate, work rules",
-"amet, hind, tööreeglid":"role, rate, work rules",
+"amet, hind, tööreeglid":"job, rate, work rules",
 "Need valikud kehtivad selle projekti kohta: amet, hind, ületunnid ja tööreeglid (Reklaam 10 h, Film 12 h või oma valik). Muudatused salvestuvad nupuga „Salvesta hind ja reeglid” või kui vajutad „Alusta tööd”.":"These options apply to this project: role, rate, overtime and work rules (Commercial 10 h, Film 12 h or your own). Changes are saved with “Save rate and rules” or when you press “Start work”.",
 "Kokku {0} · {1} ilma KM-ta.":"Total {0} · {1} excl. VAT.",
 "{0} / h":"{0} / h",
@@ -1694,7 +1694,7 @@ const EN=/*EN-START*/{
 "Kõik väljavõtted":"All statements",
 "+ Lisa päev · prep, võttepäev või muu":"+ Add a day · prep, shoot or other",
 "+ Lisa päev":"+ Add a day",
-"Lisa päev":"Add a day",
+"Lisa päev":"Add day",
 "Muuda päeva":"Edit day",
 "Päeva liik":"Day type",
 "Võttepäev":"Shoot day",
@@ -1791,7 +1791,19 @@ const EN=/*EN-START*/{
 "Chrome’is menüü ⋮ → „Installi rakendus”":"In Chrome: menu ⋮ → “Install app”",
 "Chrome’is või Edge’is aadressiribal „Installi”, Macis Safaris Fail → „Lisa Docki”":"In Chrome or Edge: “Install” in the address bar. On a Mac in Safari: File → “Add to Dock”",
 "Arvuti":"Computer",
-"Daybill töötab ka ilma paigaldamata ja ilma internetita. Muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.":"Daybill also works without installing and without internet. Changes reach your other devices once you are back online."
+"Daybill töötab ka ilma paigaldamata ja ilma internetita. Muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.":"Daybill also works without installing and without internet. Changes reach your other devices once you are back online.",
+"Projekti valikud":"Project options",
+"Lisa amet ja hind":"Add your job and rate",
+"Oma reeglid":"Custom rules",
+"Tööaja ülevaade produtsendile":"Working time overview for the producer",
+"Lisa tööpäev":"Add a working day",
+"Tunde":"Hours",
+"Kommentaar (valikuline)":"Comment (optional)",
+"Lõuna, pausid ja päeva liik":"Lunch, breaks and day type",
+"Prep või muu päev kindla summaga":"Prep or other day with a fixed amount",
+"✓ Päev lisatud. Järgmine päev on valmis.":"✓ Day added. The next day is ready.",
+"+ Lisa kulu (nt kaamera rent, sõit)":"+ Add a cost (e.g. camera rental, mileage)",
+"Lisakulud":"Extra costs"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
