@@ -1608,7 +1608,10 @@ const EN=/*EN-START*/{
 "Kõik on valmis.":"All set.",
 "Kui töö algab, vajuta „Call”. Daybill hakkab aega lugema.":"When work starts, tap “Call”. Daybill starts counting.",
 "Peida juhend":"Hide tips",
-"Sünkroonimine ei käivitunud · andmed on selles seadmes alles":"Sync didn't start · your data is safe on this device"
+"Sünkroonimine ei käivitunud · andmed on selles seadmes alles":"Sync didn't start · your data is safe on this device",
+"Tööd oli alla minuti, seda ei saa salvestada. Kas lõpetan ilma salvestamata?":"That was less than a minute of work, so it cannot be saved. Finish without saving?",
+"Kell on käinud {0} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem eelvaates (Muuda).":"The clock has been running for {0} hours. If that is right, tap OK. If you forgot to stop it, save anyway and fix the end time later in the preview (Edit).",
+"Kell käib juba projektis „{0}”. Lõpetan selle päeva ja alustan „{1}”?":"The clock is already running on “{0}”. Finish that day and start “{1}”?"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

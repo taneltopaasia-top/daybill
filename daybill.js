@@ -72,18 +72,25 @@ function renderClock(){const p=cp();clearInterval(tick);
  $d('ckProject').onchange=e=>{if(e.target.value==='__new'){$d('ckNew').classList.remove('hidden');bindNew();return}clockProject=e.target.value;try{localStorage.setItem('daybill.clockProject',clockProject)}catch(e){}renderClock()};
  $d('ckCall')&&($d('ckCall').onclick=()=>{// salvesta valikud enne algust (sama kontroll nagu nupul „Salvesta hind ja reeglid”)
   if(optForm&&$d('job')&&$d('job').value.trim()){try{optForm.requestSubmit()}catch(e){}if($d('settingsError')&&$d('settingsError').textContent){$d('ckOpts').open=true;return}}
-  if(!p.job){$d('ckError').textContent='Täida enne projekti valikud: amet ja hind.';$d('ckOpts').open=true;$d('job')&&$d('job').focus();return}lastWrap=null;p.clock={start:new Date().toISOString(),pauseSeconds:0,device:standalone?'telefon':'brauser'};clockProject=p.id;save();renderClock()});
+  if(!p.job){$d('ckError').textContent='Täida enne projekti valikud: amet ja hind.';$d('ckOpts').open=true;$d('job')&&$d('job').focus();return}const other=state.projects.find(x=>x.clock&&x.id!==p.id&&!x.deleted);if(other){if(!confirm(`Kell käib juba projektis „${other.name}”. Lõpetan selle päeva ja alustan „${p.name}”?`)||!wrap(other,true))return}
+  lastWrap=null;p.clock={start:new Date().toISOString(),pauseSeconds:0,device:standalone?'telefon':'brauser'};clockProject=p.id;save();renderClock()});
  $d('ckPause')&&($d('ckPause').onclick=()=>{const c=p.clock;if(c.pausedAt){c.pauseSeconds=(c.pauseSeconds||0)+Math.round((Date.now()-Date.parse(c.pausedAt))/1000);delete c.pausedAt}else c.pausedAt=new Date().toISOString();save();renderClock()});
  $d('ckComment')&&($d('ckComment').oninput=e=>{p.clock.comment=e.target.value;save()});
  $d('ckWrap')&&($d('ckWrap').onclick=()=>wrap(p));
  if(c)tick=setInterval(()=>{const el=$d('ckTime');if(!el||view!=='clock'){clearInterval(tick);return}el.textContent=fmt(elapsed(p.clock))},1000)}
-function wrap(p){const c=p.clock;if(!c)return;const end=new Date(),start=new Date(c.start);let pause=(c.pauseSeconds||0)+(c.pausedAt?Math.round((end-Date.parse(c.pausedAt))/1000):0);
+function wrap(p,quiet){const c=p.clock;if(!c)return false;const end=new Date(),start=new Date(c.start);let pause=(c.pauseSeconds||0)+(c.pausedAt?Math.round((end-Date.parse(c.pausedAt))/1000):0);
  const e={id:(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:ymd(start),endDate:ymd(end),start:hm(start),end:hm(end),comment:(c.comment||'').trim(),job:p.job,rate:p.rate,source:'Daybill kell',breaks:Math.round(pause/60)||undefined};
- try{const mins=duration(e);if(mins<1)throw Error('Tööd oli alla minuti, seda ei saa salvestada.')}catch(err){if(!confirm((err.message||'Tööaeg on liiga lühike.')+' Kas lõpetan ilma salvestamata?'))return;delete p.clock;save();renderClock();return}
- if(!confirm(`Lõpetan: ${e.start} → ${e.end}${e.breaks?', paus '+e.breaks+' min':''}. Salvestan?`))return;
+ const worked=end-start-pause*1000,drop=()=>{delete p.clock;save();renderClock();return true};
+ if(worked<60000){if(!confirm('Tööd oli alla minuti, seda ei saa salvestada. Kas lõpetan ilma salvestamata?'))return false;return drop()}
+ try{duration(e)}catch(err){if(!confirm((err.message||'Tööaeg on liiga lühike.')+' Kas lõpetan ilma salvestamata?'))return false;return drop()}
+ // Tavaline päev on kuni ~16 h. Pikem tähendab tihti, et kell jäi kogemata käima.
+ const dm=d=>d.getDate()+'.'+(d.getMonth()+1)+'. ';const sameDay=e.date===e.endDate,hrs=Math.floor(worked/3600e3);
+ const from=(sameDay?'':dm(start))+e.start,to=(sameDay?'':dm(end))+e.end;
+ if(hrs>=16&&!confirm(`Kell on käinud ${hrs} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem eelvaates (Muuda).`))return false;
+ if(!quiet&&!confirm(`Lõpetan: ${from} → ${to}${e.breaks?', paus '+e.breaks+' min':''}. Salvestan?`))return false;
  p.entries.push(e);delete p.clock;save();
  let sum='';try{const r=calculate(p,[e])[0];sum=' · '+h(r.mins)+(r.net!=null?' · '+money(r.net)+' ilma KM-ta':'')}catch(x){}
- lastWrap={pid:p.id,text:`${dayLabel(e.date)} · ${e.start} → ${e.end}${e.breaks?' · paus '+e.breaks+' min':''}${sum}`};renderClock()}
+ lastWrap={pid:p.id,text:`${dayLabel(e.date)} · ${e.start} → ${e.end}${e.breaks?' · paus '+e.breaks+' min':''}${sum}`};renderClock();return true}
 function priceLabel(p){try{if(isFixed(p))return money(p.fixedPrice)+' fikseeritud';if(dayMode(p))return money(p.dayRate)+' / päev'}catch(e){}return money(p.rate)+' / h'}
 // Kellast eelvaatesse: sama projekt lahti, tööaja vaade.
 function openPreview(pid){state.selected=pid;try{archiveView=false;projectExpanded=true;setStage('hours')}catch(e){}save();show('hours');setTimeout(()=>{const el=$d('summary');el&&el.scrollIntoView({block:'start'})},50)}
