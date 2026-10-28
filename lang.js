@@ -1766,11 +1766,24 @@ const EN=/*EN-START*/{
 "Vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.":"Tap the ⋮ menu at the top right and choose “Install app” or “Add to Home screen”.",
 "Safari menüüs vali Fail → „Lisa Docki”. Daybill tekib Docki nagu tavaline äpp.":"In the Safari menu choose File → “Add to Dock”. Daybill appears in your Dock like any other app.",
 "Chrome’is või Edge’is vajuta aadressiriba paremas servas paigaldusikooni. Võid Daybilli ka lihtsalt brauseris edasi kasutada.":"In Chrome or Edge, click the install icon at the right end of the address bar. You can also just keep using Daybill in the browser.",
+"Tehtud":"Done",
 "Hiljem":"Later",
 "Loo esimene projekt.":"Create your first project.",
 "Kirjuta filmi, reklaami või kliendi nimi ja vajuta „Lisa”. Siis lisad oma ameti ja hinna ning saad kella käima panna.":"Type the name of the film, commercial or client and tap “Add”. Then add your job title and rate, and you can start the clock.",
 "Peaaegu valmis.":"Almost there.",
-"Kirjuta allpool „Projekti valikud” alla oma amet ja tunni- või päevatasu. Siis vajuta „Call” ja kell hakkab käima.":"Under “Project options” below, type your job title and your hourly or day rate. Then tap “Call” and the clock starts."
+"Kirjuta allpool „Projekti valikud” alla oma amet ja tunni- või päevatasu. Siis vajuta „Call” ja kell hakkab käima.":"Under “Project options” below, type your job title and your hourly or day rate. Then tap “Call” and the clock starts.",
+"Mis projekt see on?":"What kind of project is it?",
+"Reklaam":"Commercial",
+"Film":"Film",
+"Muu":"Other",
+"10 h võttepäev":"10 h shooting day",
+"12 h võttepäev":"12 h shooting day",
+"tavaline tunniarvestus":"regular hourly pay",
+"Sellest sõltuvad ületunnid: 1,5× pärast võttepäeva, 2× kaks tundi hiljem ja 3× veel kolm tundi hiljem. Hiljem saad kõike projekti valikutes muuta.":"This sets your overtime: 1.5× after the shooting day, 2× two hours later and 3× three hours after that. You can change everything later in the project options.",
+"Loo projekt":"Create project",
+"Kirjuta projekti nimi.":"Type the project name.",
+"Vali, kas see on reklaam, film või muu.":"Choose whether it is a commercial, a film or something else.",
+"Kirjuta projekti nimi ja vali, kas see on reklaam, film või muu. Siis lisad oma ameti ja hinna ning saad kella käima panna.":"Type the project name and choose whether it is a commercial, a film or something else. Then add your job title and rate, and you can start the clock."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

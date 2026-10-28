@@ -61,7 +61,7 @@ const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 function elapsed(c){const now=Date.now(),start=Date.parse(c.start),paused=(c.pauseSeconds||0)*1000+(c.pausedAt?now-Date.parse(c.pausedAt):0);return Math.max(0,now-start-paused)}
 function fmt(ms){const s=Math.floor(ms/1000);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
 function renderClock(){const p=cp();clearInterval(tick);
- if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><div class="ck-tip ck-first" role="status"><strong>Loo esimene projekt.</strong><br><span>Kirjuta filmi, reklaami või kliendi nimi ja vajuta „Lisa”. Siis lisad oma ameti ja hinna ning saad kella käima panna.</span></div>${newProjectHtml()}</div>`;bindNew();return}
+ if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><div class="ck-tip ck-first" role="status"><strong>Loo esimene projekt.</strong><br><span>Kirjuta projekti nimi ja vali, kas see on reklaam, film või muu. Siis lisad oma ameti ja hinna ning saad kella käima panna.</span></div>${newProjectHtml()}</div>`;bindNew();return}
  const c=p.clock;let rows=[];try{rows=calculate(p,p.entries)}catch(e){}
  const t=(()=>{try{return projectTotals(p,rows)}catch(e){return null}})();
  const recent=[...rows].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start)).slice(0,5);
@@ -121,8 +121,18 @@ function wrap(p,quiet,endAt){const c=p.clock;if(!c)return false;const end=endAt?
 function priceLabel(p){try{if(isFixed(p))return money(p.fixedPrice)+' fikseeritud';if(dayMode(p))return money(p.dayRate)+' / päev'}catch(e){}return money(p.rate)+' / h'}
 // Kellast eelvaatesse: sama projekt lahti, tööaja vaade.
 function openPreview(pid){state.selected=pid;try{archiveView=false;projectExpanded=true;setStage('hours')}catch(e){}save();show('hours');setTimeout(()=>{const el=$d('summary');el&&el.scrollIntoView({block:'start'})},50)}
-function newProjectHtml(){return `<div class="clock-field"><label for="ckName">Uue projekti nimi</label><div class="clock-new"><input id="ckName" maxlength="120" placeholder="nt Reklaam Sõida Kainelt"><button id="ckAdd" type="button">Lisa</button></div></div>`}
-function bindNew(){const add=$d('ckAdd');if(!add)return;add.onclick=()=>{const name=$d('ckName').value.trim();if(!name){$d('ckName').focus();return}const n=project(name);const last=active()[0];if(!last){try{n.worker=localStorage.getItem(WORKER)||''}catch(e){}n.reportLang=(window.HoursI18n&&window.HoursI18n.lang)==='et'?'et':'en'}if(last)for(const k of ['worker','job','rate','vat','ot','double','triple','round','reportLang','pricing','dayRate','dayHours','rules'])if(last[k]!==undefined)n[k]=JSON.parse(JSON.stringify(last[k]));lastWrap=null;state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();renderClock()}}
+function newProjectHtml(){return `<div class="clock-field"><label for="ckName">Uue projekti nimi</label><input id="ckName" maxlength="120" placeholder="nt Reklaam Sõida Kainelt"></div>
+ <div class="clock-field"><span class="ck-kind-l" id="ckKindL">Mis projekt see on?</span><div class="ck-kind" role="group" aria-labelledby="ckKindL"><button type="button" data-kind="commercial" aria-pressed="false"><strong>Reklaam</strong><span>10 h võttepäev</span></button><button type="button" data-kind="film" aria-pressed="false"><strong>Film</strong><span>12 h võttepäev</span></button><button type="button" data-kind="none" aria-pressed="false"><strong>Muu</strong><span>tavaline tunniarvestus</span></button></div><p class="help">Sellest sõltuvad ületunnid: 1,5× pärast võttepäeva, 2× kaks tundi hiljem ja 3× veel kolm tundi hiljem. Hiljem saad kõike projekti valikutes muuta.</p></div>
+ <p class="error" id="ckNewErr" role="alert"></p><div class="actions"><button id="ckAdd" type="button" class="primary wide">Loo projekt</button></div>`}
+// Reklaam või film: tööreeglid ja ületunnid nagu valikutes „Tööreeglid”. Muu: tavaline tunniarvestus.
+function setKind(n,kind){if(kind==='commercial'||kind==='film'){const d=RULE_SETS[kind].day,r={set:kind,day:d,driverFee:RULE_BASE.driverFee};for(const k of RULE_KEYS)r[k]=true;for(const k of ['mealAfter','mealX','rest','restX','nightFrom','nightTo','nightX','day6X','day7X','passengerX','driverDayX'])r[k]=RULE_BASE[k];n.rules=r;n.ot=d;n.double=d+2;n.triple=d+5}
+ else{delete n.rules;delete n.triple;n.ot=10;n.double=12}}
+function bindNew(){const add=$d('ckAdd');if(!add)return;let kind='';
+ clockView.querySelectorAll('[data-kind]').forEach(b=>b.onclick=()=>{kind=b.dataset.kind;$d('ckNewErr').textContent='';clockView.querySelectorAll('[data-kind]').forEach(x=>{x.classList.toggle('primary',x===b);x.setAttribute('aria-pressed',x===b)})});
+ $d('ckName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add.click()}};
+ add.onclick=()=>{const name=$d('ckName').value.trim(),err=$d('ckNewErr');if(!name){err.textContent='Kirjuta projekti nimi.';$d('ckName').focus();return}if(!kind){err.textContent='Vali, kas see on reklaam, film või muu.';return}
+  const n=project(name);const last=active()[0];if(!last){try{n.worker=localStorage.getItem(WORKER)||''}catch(e){}n.reportLang=(window.HoursI18n&&window.HoursI18n.lang)==='et'?'et':'en'}if(last)for(const k of ['worker','job','rate','vat','ot','double','triple','round','reportLang','pricing','dayRate','dayHours','rules'])if(last[k]!==undefined)n[k]=JSON.parse(JSON.stringify(last[k]));
+  setKind(n,kind);lastWrap=null;state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();renderClock()}}
 
 
 /* ---------- 3 · kokkuvõte (ilma raamatupidamiseta) ---------- */
