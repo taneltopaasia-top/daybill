@@ -87,3 +87,23 @@ main{margin-top:34px}
 @media(max-width:650px){.db-bar #langSwitch{order:0}.db-bar #langSwitch button{min-height:30px}}
 .db-nav button{white-space:nowrap}
 @media(min-width:651px) and (max-width:1100px){.db-bar-in{flex-wrap:wrap;padding:8px 16px;gap:10px}.db-sync{display:none}}
+/* Esimene avamine: juhend */
+.db-wiz .db-welcome-in{padding:28px 24px;text-align:left}
+.db-wiz h2{font-size:24px;margin:0 0 10px}
+.wiz-big{font-size:17px;line-height:1.5}
+.wiz-in{width:100%;font-size:18px;min-height:52px;margin:10px 0 0}
+.wiz-actions{display:grid;gap:10px;margin-top:18px}
+.wiz-actions button,.wiz-choice button{min-height:54px;font-size:17px;width:100%}
+.wiz-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.wiz-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.wiz-chips button{min-height:40px;padding:6px 14px}
+.wiz-rate{display:flex;align-items:center;gap:10px}.wiz-rate .wiz-in{margin:10px 0 0}.wiz-rate span{font-size:18px;white-space:nowrap;margin-top:10px}
+.wiz-dots{display:flex;gap:6px;margin-bottom:18px}.wiz-dots span{height:4px;flex:1;background:var(--fg);opacity:.2}.wiz-dots span.on{opacity:1}
+.wiz-back{margin-top:14px;border:0;background:none;padding:6px 0;min-height:0;font-size:14px;opacity:.75}
+.ck-tip{position:relative;text-align:left;border:2px solid var(--fg);padding:14px 16px;margin:0 0 16px;font-size:15px;line-height:1.6}
+.ck-tip-x{display:block;margin-top:10px;border:0;background:none;padding:0;min-height:0;font-size:13px;text-decoration:underline;opacity:.75}
+.db-wiz{background:var(--bg)}
+.db-wiz .db-welcome-in{border:0;max-width:440px;max-height:100%}
+/* Telefonis: lahtrid 16 px, et iPhone ei suumiks lahtrisse vajutades; nupud reageerivad kohe. */
+@media (pointer:coarse){input,select,textarea{font-size:16px}}
+button,a,label,select{touch-action:manipulation}

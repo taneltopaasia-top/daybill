@@ -5,6 +5,7 @@
 const $d=id=>document.getElementById(id);
 const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
+const TOUR='daybill.tour',setFlag=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
 const VIEW_KEY='daybill.view',main=document.querySelector('main');
 const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
 const phone=()=>matchMedia('(max-width:650px)').matches;
@@ -50,12 +51,12 @@ const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 function elapsed(c){const now=Date.now(),start=Date.parse(c.start),paused=(c.pauseSeconds||0)*1000+(c.pausedAt?now-Date.parse(c.pausedAt):0);return Math.max(0,now-start-paused)}
 function fmt(ms){const s=Math.floor(ms/1000);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
 function renderClock(){const p=cp();clearInterval(tick);
- if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><p class="help">Alusta projektiga: kirjuta nimi ja amet.</p>${newProjectHtml()}</div>`;bindNew();return}
+ if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><p class="help">Alusta uue projektiga: kirjuta selle nimi.</p>${newProjectHtml()}</div>`;bindNew();return}
  const c=p.clock;let rows=[];try{rows=calculate(p,p.entries)}catch(e){}
  const t=(()=>{try{return projectTotals(p,rows)}catch(e){return null}})();
  const recent=[...rows].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start)).slice(0,5);
  clockView.innerHTML=`<div class="clock">
-  <div class="clock-field"><label for="ckProject">Projekt</label><select id="ckProject">${active().map(x=>`<option value="${escH(x.id)}"${x.id===p.id?' selected':''}>${escH(x.name)}${x.clock?' · tööl':''}</option>`).join('')}<option value="__new">+ Uus projekt…</option></select></div>
+  ${tourTip(p)}<div class="clock-field"><label for="ckProject">Projekt</label><select id="ckProject">${active().map(x=>`<option value="${escH(x.id)}"${x.id===p.id?' selected':''}>${escH(x.name)}${x.clock?' · tööl':''}</option>`).join('')}<option value="__new">+ Uus projekt…</option></select></div>
   <div id="ckNew" class="hidden">${newProjectHtml()}</div>
   ${lastWrap&&lastWrap.pid===p.id&&!c?`<div class="set-note ck-done" role="status"><strong>✓ Päev salvestatud</strong><br>${escH(lastWrap.text)}<div class="actions" style="margin:12px 0 0"><button type="button" id="ckPreview" class="primary">Tee arve eelvaade</button><button type="button" id="ckNewProject">Alusta uut projekti</button></div></div>`:''}
   <details class="ck-opts" id="ckOpts"${p.job?'':' open'}><summary>Projekti valikud · ${p.job?escH(p.job)+' · '+escH(priceLabel(p)):'amet, hind, tööreeglid'}</summary><p class="help">Need valikud kehtivad selle projekti kohta: amet, hind, ületunnid ja tööreeglid (Reklaam 10 h, Film 12 h või oma valik). Muudatused salvestuvad nupuga „Salvesta hind ja reeglid” või kui vajutad „Alusta tööd”.</p><div id="ckOptsSlot"></div></details>
@@ -66,7 +67,7 @@ function renderClock(){const p=cp();clearInterval(tick);
   <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<div class="row-item"><span>${escH(dayLabel(e.date))}<br>${escH(e.start)} → ${escH(e.end)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></div>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
   ${t?`<p class="help">Kokku ${h(t.mins)} · ${money(t.net)} ilma KM-ta.</p><div class="actions"><button type="button" id="ckPreview2">Vaata eelvaadet</button></div>`:''}</div></div>`;
  if(optForm){state.selected=p.id;try{render()}catch(e){}$d('ckOptsSlot').append(optForm)}
- $d('ckPreview')&&($d('ckPreview').onclick=()=>openPreview(p.id));$d('ckPreview2')&&($d('ckPreview2').onclick=()=>openPreview(p.id));
+ $d('ckTipX')&&($d('ckTipX').onclick=()=>{setFlag(TOUR,null);renderClock()});$d('ckPreview')&&($d('ckPreview').onclick=()=>{if(lastWrap)setFlag(TOUR,null);openPreview(p.id)});$d('ckPreview2')&&($d('ckPreview2').onclick=()=>openPreview(p.id));
  $d('ckNewProject')&&($d('ckNewProject').onclick=()=>{lastWrap=null;$d('ckProject').value='__new';$d('ckNew').classList.remove('hidden');bindNew();$d('ckName').focus()});
  $d('ckProject').onchange=e=>{if(e.target.value==='__new'){$d('ckNew').classList.remove('hidden');bindNew();return}clockProject=e.target.value;try{localStorage.setItem('daybill.clockProject',clockProject)}catch(e){}renderClock()};
  $d('ckCall')&&($d('ckCall').onclick=()=>{// salvesta valikud enne algust (sama kontroll nagu nupul „Salvesta hind ja reeglid”)
@@ -78,7 +79,7 @@ function renderClock(){const p=cp();clearInterval(tick);
  if(c)tick=setInterval(()=>{const el=$d('ckTime');if(!el||view!=='clock'){clearInterval(tick);return}el.textContent=fmt(elapsed(p.clock))},1000)}
 function wrap(p){const c=p.clock;if(!c)return;const end=new Date(),start=new Date(c.start);let pause=(c.pauseSeconds||0)+(c.pausedAt?Math.round((end-Date.parse(c.pausedAt))/1000):0);
  const e={id:(Date.now().toString(36)+Math.random().toString(36).slice(2)),date:ymd(start),endDate:ymd(end),start:hm(start),end:hm(end),comment:(c.comment||'').trim(),job:p.job,rate:p.rate,source:'Daybill kell',breaks:Math.round(pause/60)||undefined};
- try{const mins=duration(e);if(mins<1)throw Error('Alla minuti töö jäeti salvestamata.')}catch(err){if(!confirm((err.message||'Tööaeg on liiga lühike.')+' Kas lõpetan ilma salvestamata?'))return;delete p.clock;save();renderClock();return}
+ try{const mins=duration(e);if(mins<1)throw Error('Tööd oli alla minuti, seda ei saa salvestada.')}catch(err){if(!confirm((err.message||'Tööaeg on liiga lühike.')+' Kas lõpetan ilma salvestamata?'))return;delete p.clock;save();renderClock();return}
  if(!confirm(`Lõpetan: ${e.start} → ${e.end}${e.breaks?', paus '+e.breaks+' min':''}. Salvestan?`))return;
  p.entries.push(e);delete p.clock;save();
  let sum='';try{const r=calculate(p,[e])[0];sum=' · '+h(r.mins)+(r.net!=null?' · '+money(r.net)+' ilma KM-ta':'')}catch(x){}
@@ -195,7 +196,7 @@ function renderSettings(){const lang=(window.HoursI18n&&window.HoursI18n.lang)||
  setView.querySelectorAll('[data-theme-set]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeSet);renderSettings()});
  bindStorage($d('storageBox'));
  try{window.daybillRenderSync&&window.daybillRenderSync($d('syncBox'))}catch(e){}
- if(!$d('syncBox').innerHTML)$d('syncBox').innerHTML='<p class="help">Praegu on andmed ainult selles seadmes. Sünkroonimine lisatakse peagi: siis logid telefonis ja arvutis sama e-postiga sisse ja näed kõike mõlemas.</p>'}
+ if(!$d('syncBox').innerHTML)$d('syncBox').innerHTML='<p class="help">Praegu on andmed ainult selles seadmes. Sünkroonimine ei käivitunud: kontrolli internetiühendust ja ava Daybill uuesti.</p>'}
 
 
 /* ---------- eelvaate PDF: salvesta või saada e-postiga ---------- */
@@ -256,15 +257,46 @@ document.title='Daybill';
 // Esimene vaade: telefonis kell, arvutis projektid.
 let first='clock';try{first=localStorage.getItem(VIEW_KEY)||'clock'}catch(e){}
 show(first);
-// Esimene avamine: lühike selgitus, mis on tasuta ja kui palju mahub.
+// Esimene avamine: lühike juhend samm-sammult. Uus kasutaja vastab neljale küsimusele ja Daybill seab kõik ise valmis.
 const WELCOME='daybill.welcome.v1';let seen=false;try{seen=!!localStorage.getItem(WELCOME)}catch(e){}
-if(!seen){const w=document.createElement('div');w.className='db-welcome';w.setAttribute('role','dialog');w.setAttribute('aria-label','Tere tulemast');
- w.innerHTML=`<div class="db-welcome-in"><h2>Tere tulemast Daybilli</h2>
- <p><strong>1 · Kell</strong> · vali projekt ja oma valikud, vajuta „Alusta tööd” ja lõpus „Lõpeta”.<br><strong>2 · Eelvaade</strong> · selge ülevaade tööst ja summast produtsendile: salvesta PDF või saada e-postiga.<br><strong>3 · Arve</strong> · täida üks kord arvepõhi (logo ja andmed), siis teeb Daybill arve sinu eest.</p>
- <p><strong>Daybill on tasuta ja jääb tasuta.</strong> Tasulist versiooni pole ja sinult ei küsita kunagi raha ega maksekaarti.</p>
- <p>Igal kontol on 5 MB ruumi. Sellest jätkub umbes 1000+ projektiks, mis tähendab tavaliselt üle 10 aasta tööd. Kui palju ruumi veel alles on, näed alati menüüs Seaded → Mälu ja piirid. Vanu projekte saad seal ise kustutada.</p>
- <div class="actions"><button type="button" class="primary" id="dbWelcomeOk">Selge, alustan</button></div></div>`;
- document.body.append(w);$d('dbWelcomeOk').onclick=()=>{try{localStorage.setItem(WELCOME,'1')}catch(e){}w.remove()}}
+const hasProjects=()=>state.projects.some(x=>!x.deleted&&!x.kind);
+function startWizard(){const w=document.createElement('div');w.className='db-welcome db-wiz';w.setAttribute('role','dialog');w.setAttribute('aria-label','Alustamine');document.body.append(w);
+ const ans={name:'',job:'',rate:'',project:''};let step=0;
+ const lang=()=>(window.HoursI18n&&window.HoursI18n.lang)||'et';
+ const dots=n=>`<div class="wiz-dots" aria-hidden="true">${[1,2,3,4].map(i=>`<span class="${i<=n?'on':''}"></span>`).join('')}</div>`;
+ const close=()=>{setFlag(WELCOME,'1');w.remove()};
+ const steps=[
+  ()=>`<h2 translate="no">Daybill</h2><p class="wiz-big" translate="no">Vali keel · Choose language</p><div class="wiz-choice" translate="no"><button type="button" data-lang="et">Eesti</button><button type="button" data-lang="en">English</button></div>`,
+  ()=>`<h2>Tere!</h2><p class="wiz-big">Daybill paneb kirja sinu tööpäevad ja teeb neist arve.</p><p>Seadistamine võtab umbes minuti. Daybill on tasuta ja jääb tasuta.</p><div class="wiz-actions"><button type="button" class="primary wiz-go">Alustame</button><button type="button" class="wiz-have">Mul on juba konto</button></div>`,
+  ()=>`${dots(1)}<h2>Mis su nimi on?</h2><p>See läheb tunnilehele ja arvele.</p><input class="wiz-in" id="wizIn" autocomplete="name" maxlength="120" placeholder="Ees- ja perekonnanimi" value="${escH(ans.name)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
+  ()=>`${dots(2)}<h2>Mis tööd sa teed?</h2><p>Vali üks või kirjuta ise.</p><div class="wiz-chips">${['Gaffer','Best boy','Valgustaja','Grip','Operaator','Kunstnik'].map(j=>`<button type="button" data-job="${j}">${j}</button>`).join('')}</div><input class="wiz-in" id="wizIn" maxlength="80" placeholder="Amet" value="${escH(ans.job)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
+  ()=>`${dots(3)}<h2>Kui palju sa tunnis küsid?</h2><p>Summa ilma käibemaksuta. Ületunnid arvutab Daybill ise ja hinda saad hiljem alati muuta.</p><div class="wiz-rate"><input class="wiz-in" id="wizIn" type="text" inputmode="decimal" autocomplete="off" placeholder="30" value="${escH(ans.rate)}"><span>€ / h</span></div><div class="wiz-actions"><button type="button" class="primary wiz-go">Edasi</button></div>`,
+  ()=>`${dots(4)}<h2>Mis projektiga alustad?</h2><p>Näiteks filmi, reklaami või kliendi nimi.</p><input class="wiz-in" id="wizIn" maxlength="120" placeholder="nt Reklaam Sõida Kainelt" value="${escH(ans.project)}"><div class="wiz-actions"><button type="button" class="primary wiz-go">Valmis</button></div>`];
+ const keys=[null,null,'name','job','rate','project'];
+ function draw(){w.innerHTML=`<div class="db-welcome-in">${steps[step]()}<p class="error" id="wizErr" role="alert"></p>${step>1?'<button type="button" class="wiz-back">← Tagasi</button>':''}</div>`;
+  const inp=w.querySelector('#wizIn');if(inp){setTimeout(()=>inp.focus(),30);inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();next()}}}
+  w.querySelectorAll('[data-lang]').forEach(b=>{b.classList.toggle('primary',b.dataset.lang===lang());b.onclick=()=>{try{window.HoursI18n.set(b.dataset.lang)}catch(e){}step=1;draw()}});
+  w.querySelectorAll('[data-job]').forEach(b=>b.onclick=()=>{inp.value=b.textContent;next()});
+  const go=w.querySelector('.wiz-go');go&&(go.onclick=next);
+  const have=w.querySelector('.wiz-have');have&&(have.onclick=()=>{close();show('settings');setTimeout(()=>{const e=$d('syEmail');e&&(e.scrollIntoView({block:'center'}),e.focus())},80)});
+  const back=w.querySelector('.wiz-back');back&&(back.onclick=()=>{if(inp)ans[keys[step]]=inp.value.trim();step--;draw()})}
+ function next(){const k=keys[step];if(!k){step++;draw();return}
+  const inp=w.querySelector('#wizIn'),v=inp.value.trim(),err=w.querySelector('#wizErr');
+  if(!v){err.textContent=k==='rate'?'Kirjuta oma tunnihind, näiteks 30.':'Palun täida see lahter.';inp.focus();return}
+  if(k==='rate'){const n=Number(v.replace(',','.'));if(!(n>0)||n>10000){err.textContent='Kirjuta tunnihind numbrina, näiteks 30.';inp.focus();return}ans.rate=String(n)}else ans[k]=v;
+  if(step<steps.length-1){step++;draw();return}
+  finish()}
+ function finish(){const n=project(ans.project);n.worker=ans.name;n.job=ans.job;n.rate=Number(ans.rate);n.reportLang=lang();
+  state.projects.push(n);state.selected=n.id;clockProject=n.id;setFlag('daybill.clockProject',n.id);save();
+  setFlag(TOUR,'call');close();show('clock')}
+ draw()}
+if(!seen){if(hasProjects())setFlag(WELCOME,'1');else startWizard()}
+// Juhend kella vaates: üks lause korraga, kuni esimene päev on tehtud.
+function tourTip(p){let t='';try{t=localStorage.getItem(TOUR)||''}catch(e){}if(!t||!p)return '';
+ const msg=p.clock?['Kell käib.','Kui päev on läbi, vajuta „Wrap”. Telefoni võid vahepeal ära panna, kell käib edasi. Lõunapausi ajaks vajuta „Paus”.']
+  :lastWrap&&lastWrap.pid===p.id?['Esimene päev on kirjas!','Vajuta „Tee arve eelvaade”. Seal näed tunde ja summat ning saad need produtsendile saata. Arve teed hiljem nupust „Arve”.']
+  :['Kõik on valmis.','Kui töö algab, vajuta „Call”. Daybill hakkab aega lugema.'];
+ return `<div class="ck-tip" role="status"><strong>${msg[0]}</strong><br><span>${msg[1]}</span><button type="button" class="ck-tip-x" id="ckTipX" aria-label="Peida juhend">Peida juhend</button></div>`}
 // Teised aknad/sünk: kui andmed muutuvad, joonista kell uuesti.
 window.addEventListener('storage',e=>{if(e.key==='daybill.v1'){try{const s=JSON.parse(e.newValue);if(s&&Array.isArray(s.projects)){state.projects=s.projects;render();if(view==='clock')renderClock()}}catch(x){}}});
 window.daybillRefresh=()=>{try{render()}catch(e){}if(view==='clock')renderClock();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}running()};

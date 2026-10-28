@@ -138,7 +138,7 @@ function fillClientFields(c){fillClient(c);for(const [id,k] of [['invCode','code
 function fillClient(c){draft.client={name:c.name||'',code:c.code||'',vatNo:c.vatNo||'',line1:(c.lines||[])[0]||c.line1||'',line2:(c.lines||[])[1]||c.line2||'',email:c.email||''}}
 
 /* ---------- kontroll enne koostamist ---------- */
-function problems(){const out=[],c=computed();if(!sellerReady())out.push('Sinu andmed on täitmata: ava „Seaded” ja sisesta vähemalt nimi, aadress ja IBAN. Need tulevad arvele.');
+function problems(){const out=[],c=computed();if(!sellerReady())out.push('Arvepõhi on veel täitmata: ava Arve → Arvepõhi ja kirjuta sinna vähemalt nimi, aadress ja IBAN. Need tulevad arvele.');
  if(!draft.client.name.trim())out.push('Kirjuta arve saaja nimi.');if(!c.rows.length)out.push('Lisa vähemalt üks rida kirjelduse ja hinnaga.');
  if(c.rows.some(r=>!r.desc))out.push('Igal real peab olema kirjeldus.');if(c.rows.some(r=>r.qty<=0))out.push('Kogus peab olema suurem kui 0.');
  if(!(c.gross>0))out.push('Arve summa peab olema suurem kui 0.');if(!/^\d{4}-\d{2}-\d{2}$/.test(draft.date))out.push('Vali arve kuupäev.');
@@ -159,7 +159,7 @@ function preview(){const c=computed();if(!c.rows.length){msg='Lisa vähemalt ük
 function update(x,changes){Object.assign(x,changes,{_u:Date.now(),updatedAt:new Date().toISOString()});saveList([x]);render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}
 function creditNote(x){if(admin()||x.fromHours){alertBox('Kreeditarve tee Hoursis (Macis), kus on sinu arvete register.');return}if(credited(x)){alertBox('See arve on juba täielikult krediteeritud.');return}if(!confirm(`Koostan kreeditarve arvele ${x.number}. See tühistab arve summa (${eurUi(x.gross)}). Jätkan?`))return;
  const saved={...draft};draft={...fresh(),date:isoToday()<x.date?x.date:isoToday(),lang:x.lang,vat:x.vatRate,client:{name:x.client.name,code:x.client.code||'',vatNo:x.client.vatNo||'',line1:x.client.lines[0]||'',line2:x.client.lines[1]||'',email:x.client.email||''},rows:x.rows.map(r=>({...r,price:-r.price}))};
- if(!sellerReady()){draft=saved;alertBox('Täida enne „Seaded” all oma andmed.');return}
+ if(!sellerReady()){draft=saved;alertBox('Täida enne arvepõhi (Arve → Arvepõhi).');return}
  const c=build({credit:true,creditFor:x.id,creditNumber:x.number,days:0,due:draft.date});c.rows=x.rows.map(r=>({...r,price:-r.price,total:-r.total}));c.net=-x.net;c.vat=-x.vat;c.gross=-x.gross;c.words=amountWords(c.gross,c.lang);c.hoursProject=x.hoursProject||'';c.hoursNet=undefined;draft=saved;
  list.push(c);saveList([c]);msg=`Kreeditarve ${escH(c.number)} on koostatud. Arve ${escH(x.number)} on nüüd krediteeritud.`;deliverPdf(c);render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}
 function alertBox(t){alert(t)}
@@ -200,7 +200,7 @@ function newHtml(c){const n=nextNumber(draft.date),projects=hoursProjects().filt
   <div><label for="invDays">Makseaeg · päeva</label><input id="invDays" type="number" min="0" value="${escH(draft.days)}"></div>
   <div><label for="invVat">Käibemaks · %</label><input id="invVat" type="number" min="0" max="100" step="0.01" value="${escH(draft.vat)}"></div>
   <div><label for="invLang">Arve keel</label><select id="invLang"><option value="et"${draft.lang==='et'?' selected':''}>Eesti</option><option value="en"${draft.lang==='en'?' selected':''}>Inglise</option></select></div>
-  <div class="full"><label>Arve number</label><div class="help" style="margin:4px 0 0">Järgmine vaba number: <strong>${escH(n.number)}</strong>. Programm annab selle ise, kordumist ei saa tekkida.</div></div>
+  <div class="full"><label>Arve number</label><div class="help" style="margin:4px 0 0">Järgmine vaba number: <strong>${escH(n.number)}</strong>. Daybill annab numbri ise ja sama numbrit ei tule kunagi kaks korda.</div></div>
  </div>
  <div class="inv-total"><div><label>Ilma KM-ta</label><strong>${eurUi(c.net)}</strong></div><div><label>KM ${escH(c.vatRate)}%</label><strong>${eurUi(c.vat)}</strong></div><div><label>Kokku</label><strong>${eurUi(c.gross)}</strong></div></div>
  <div class="actions"><button type="button" class="primary" id="invIssue">Koosta arve</button><button type="button" id="invPreview">Vaata eelvaadet (PDF)</button><button type="button" id="invClear">Tühjenda</button></div>

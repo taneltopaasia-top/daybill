@@ -35,7 +35,7 @@ async function pushProjects(){if(!user)return;if(pushing){projectsChanged();retu
  for(const p of state.projects){const f=hash(p.deleted?'deleted':fp(p));if(pushed.get('p:'+p.id)===f)continue;
   if(full&&!p.deleted){blocked++;continue}
   p._u=Date.now();done.push(['p:'+p.id,f]);batch.set(F.doc(db,'users',user.uid,'projects',p.id),p.deleted?{deleted:true,u:p._u}:{data:JSON.stringify(p),u:p._u});n++;if(n>=400)break}
- if(blocked)setStatus('Pilve mälu on täis: uusi muudatusi ei sünkita. Ava Seaded → Mälu ja kustuta vanu projekte.');
+ if(blocked)setStatus('Pilve mälu on täis, nii et uusi muudatusi ei saadeta pilve. Ava Seaded → Mälu ja piirid ning kustuta mõni vana projekt.');
  if(!n)return;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
  pushing=true;try{await batch.commit();for(const [k,f] of done)pushed.set(k,f);savePushed();setStatus('Sünkroonitud · '+user.email)}catch(e){setStatus('Sünk ootab ühendust · muudatused on alles')}finally{pushing=false}
  if(n>=400)projectsChanged()}
@@ -78,7 +78,7 @@ async function start(u){user=u;for(const f of unsub)f();unsub=[];if(!u){setStatu
 
 /* ---------- konto (seadetes) ---------- */
 function msgOf(e){const c=e&&e.code||'';return {'auth/invalid-email':'E-post on vale.','auth/missing-password':'Kirjuta parool.','auth/weak-password':'Parool peab olema vähemalt 6 märki.','auth/email-already-in-use':'Selle e-postiga konto on juba olemas: logi sisse.','auth/invalid-credential':'E-post või parool on vale. Kui unustasid parooli, vajuta „Unustasin parooli”.','auth/wrong-password':'E-post või parool on vale. Kui unustasid parooli, vajuta „Unustasin parooli”.','auth/user-not-found':'Sellise e-postiga kontot pole: loo konto.','auth/too-many-requests':'Liiga palju katseid. Proovi mõne minuti pärast.','auth/network-request-failed':'Internet puudub.','auth/requires-recent-login':'Logi uuesti sisse ja proovi siis uuesti.'}[c]||e.message||String(e)}
-function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sünkroonimine pole veel sisse lülitatud. Praegu on andmed ainult selles seadmes.</p>';return}if(!fb){el.innerHTML='<p class="help">Laen…</p>';return}
+function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sünkroonimine ei käivitunud. Praegu on andmed ainult selles seadmes.</p>';return}if(!fb){el.innerHTML='<p class="help">Laen…</p>';return}
  if(user){el.innerHTML=`<p class="help">Sisse logitud: <strong>${esc(user.email)}</strong>. Logi samaga sisse ka telefonis ja arvutis: projektid, tunnid ja arved on mõlemas.</p><p class="help" id="syncState">${esc(status)}</p><div class="actions"><button type="button" id="syOut">Logi välja</button><button type="button" id="syDel">Kustuta konto ja pilves olevad andmed</button></div><p class="error" id="syErr" role="alert"></p>`;
   $('syOut').onclick=async()=>{await fb.A.signOut(fb.auth);renderBox(el)};
   $('syDel').onclick=async()=>{if(!confirm('Kustutan sinu konto ja kõik pilves olevad andmed (projektid, arved). Selles seadmes olevad andmed jäävad alles. Seda ei saa tagasi võtta. Jätkan?'))return;try{const {F,db}=fb,uid=user.uid;for(const c of ['projects','invoices','meta']){const s=await F.getDocs(F.collection(db,'users',uid,c));for(const d of s.docs)await F.deleteDoc(d.ref)}await fb.A.deleteUser(user);renderBox(el)}catch(e){$('syErr').textContent=msgOf(e)}};return}
@@ -89,5 +89,5 @@ function renderBox(el){if(!el)return;if(!cfg){el.innerHTML='<p class="help">Sün
 window.daybillRenderSync=renderBox;
 
 if(cfg){setStatus('Ühendan…');load().then(x=>{fb=x;window.daybillSaved=projectsChanged;window.daybillInvoiceSaved=pushInvoice;window.daybillSettingsSaved=pushSettings;window.daybillReserveNumber=x2=>user?reserve(x2):Promise.resolve();
- fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>setStatus('Sünk ei käivitunud (internet puudub?) · andmed on selles seadmes'))}
+ fb.A.onAuthStateChanged(fb.auth,u=>{start(u);const box=$('syncBox');if(box)renderBox(box)})}).catch(()=>setStatus('Sünkroonimine ei käivitunud · andmed on selles seadmes alles'))}
 else setStatus('Andmed on selles seadmes');
