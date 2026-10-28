@@ -1691,14 +1691,50 @@ const EN=/*EN-START*/{
 "Viimati laaditud {0}":"Last loaded {0}",
 "kaetud kuni {0}":"covered up to {0}",
 "vahele jäi aeg":"there's a gap",
-"Kõik väljavõtted":"All statements"
+"Kõik väljavõtted":"All statements",
+"+ Lisa päev · prep, võttepäev või muu":"+ Add a day · prep, shoot or other",
+"+ Lisa päev":"+ Add a day",
+"Lisa päev":"Add a day",
+"Muuda päeva":"Edit day",
+"Päeva liik":"Day type",
+"Võttepäev":"Shoot day",
+"Prep päev":"Prep day",
+"Muu päev":"Other day",
+"Esimene päev":"First day",
+"Kuupäev":"Date",
+"Mitu päeva järjest":"How many days in a row",
+"Tasu päeva eest (ilma KM-ta)":"Pay for the day (excl. VAT)",
+"Täispäev · {0}":"Full day · {0}",
+"Pool päeva · {0}":"Half day · {0}",
+"Oma summa":"Custom amount",
+"Summa · €":"Amount · €",
+"nt 150":"e.g. 150",
+"Kellaajad (valikuline)":"Times (optional)",
+"Algus":"Start",
+"Lõpp":"End",
+"Kirjeldus (valikuline)":"Description (optional)",
+"nt valgustehnika ettevalmistus":"e.g. lighting prep",
+"nt kolimine, laadimine":"e.g. moving, loading",
+"nt eriti pikk võttepäev":"e.g. extra long shoot day",
+"Salvesta":"Save",
+"Loobu":"Cancel",
+"Vali kuupäev.":"Pick a date.",
+"Päevade arv peab olema 1 kuni 31.":"The number of days must be 1 to 31.",
+"Võttepäeval kirjuta algus ja lõpp.":"For a shoot day, enter the start and end.",
+"Kirjuta nii algus kui lõpp või jäta mõlemad tühjaks.":"Enter both start and end, or leave both empty.",
+"Kirjuta summa eurodes, näiteks 150.":"Enter the amount in euros, for example 150.",
+"Sisesta enne projekti valikutes amet.":"First enter your role in the project options.",
+"{0} kattub olemasoleva tööpäevaga.":"{0} overlaps an existing workday.",
+"Produtsent saab tööaja ja kulude ülevaate (PDF).":"The producer gets a working time and cost overview (PDF).",
+"Salvesta tööaja ja kulude ülevaade (PDF)":"Save working time and cost overview (PDF)"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
 const MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_RE=new RegExp('\\b('+MONTHS.join('|')+')\\b','gi');
 const ws=s=>s.replace(/\s+/g,' ').trim();
-const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/^\s+|\s+$/g,'\u0000').replace(/\s+/g,'\\s+').replace(/\u0000/g,'\\s*');
+// Tühik malli augu ja sõna vahel on kohustuslik (muidu „· {0} p” tõlgiks kasutaja teksti „Valguse prep”).
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/^\s+(?=[A-Za-zÀ-ž0-9])/,'\u0001').replace(/(?<=[A-Za-zÀ-ž0-9])\s+$/,'\u0001').replace(/^\s+|\s+$/g,'\u0000').replace(/\s+/g,'\\s+').replace(/\u0000/g,'\\s*').replace(/\u0001/g,'\\s+');
 const exact=new Map(),buckets=new Map(),loose=[];
 for(const [et,en] of Object.entries(EN)){
  if(!/\{\d+\}/.test(et)){exact.set(ws(et),en);continue}

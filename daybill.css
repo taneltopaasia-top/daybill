@@ -236,7 +236,7 @@ td,th{border-bottom-color:var(--line)}
  .db-hero-sum strong{font-size:32px}
 }
 #cloudStatus:empty{display:none}
-@media(min-width:651px){#hoursView #cloudStatus{display:none}}
+.db-sync{display:none!important}
 
 /* Pangaväljavõte */
 .db-bank{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px dashed var(--line);background:var(--card);padding:16px;margin:0 0 8px}
@@ -283,3 +283,24 @@ td,th{border-bottom-color:var(--line)}
  .db-m{display:inline!important;color:var(--muted)}
 }
 .db-m{display:none}
+
+/* Lisa päev */
+.db-addday{grid-column:1/-1;min-height:48px;border:1px dashed var(--fg);background:none;font-weight:700}
+.db-addday:hover{border-style:solid}
+#daysHeading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.db-addday2{border:0;background:none!important;color:var(--fg)!important;font-weight:700;font-size:15px;min-height:40px;padding:4px 0}
+.db-day-dlg{width:min(460px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:22px}
+.db-day-dlg h2{font-size:24px;margin:0 0 16px}
+.db-day-dlg form>div{margin:0 0 14px}
+.dd-kind{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
+.dd-kind button{border:0;min-height:46px;font-weight:600;font-size:14px;padding:6px 2px}
+.dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dd-pay>div{margin-top:10px}
+.dd-opt{margin:0 0 6px}
+.db-day-dlg .actions button{min-height:48px;flex:1}
+
+/* Riba ikoonid: keel ja teema */
+.db-ico{display:inline-flex;align-items:center;justify-content:center;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border:1px solid var(--line);background:none;color:var(--fg);font-weight:700;font-size:13px;letter-spacing:.5px}
+.db-ico:hover{background:var(--card);color:var(--fg)}
+.db-ico[data-code]::after{content:attr(data-code)}
+@media(max-width:650px){.db-ico{width:38px;min-width:38px;height:38px;min-height:38px}.db-bar-in{gap:6px}}

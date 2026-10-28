@@ -30,7 +30,7 @@ function invoices(){try{return window.TraageldusInvoices.all().filter(x=>!x.dele
 function createdAt(id){const t=parseInt(String(id).slice(0,8),36);return t>1577836800000&&t<4102444800000?new Date(t).toISOString():''}
 function events(){const out=[],inv=invoices(),num=id=>{const x=inv.find(v=>v.id===id);return x?x.number:''};
  for(const p of projects()){if(p.deleted)continue;const c=createdAt(p.id);if(c)out.push({at:c,kind:'project',title:'Uus projekt',meta:p.name,go:{p:p.id}});
-  for(const e of p.entries||[]){if(!e.date)continue;out.push({at:e.date,kind:'project',title:'Tööpäev',meta:[p.name,e.start&&e.end?e.start+' → '+e.end:''].filter(Boolean).join(' · '),go:{p:p.id}})}
+  for(const e of p.entries||[]){if(!e.date)continue;out.push({at:e.date,kind:'project',title:e.pay!=null&&e.pay!==''?(e.dayType==='prep'?'Prep päev':'Muu päev'):'Tööpäev',meta:[p.name,e.start&&e.end?e.start+' → '+e.end:'',e.pay!=null&&e.pay!==''?eur(e.pay):'',e.comment||''].filter(Boolean).join(' · '),go:{p:p.id}})}
   for(const h of (p.approval&&p.approval.history)||[]){if(!h.at)continue;out.push({at:h.at,kind:'project',title:h.status==='approved'?'Klient kinnitas eelvaate':h.status==='sent'?'Eelvaade saadetud':'Eelvaade muudetud',meta:[p.name,h.gross?eur(h.gross):''].filter(Boolean).join(' · '),go:{p:p.id}})}}
  for(const x of inv){const who=x.client&&x.client.name||'';
   out.push({at:x.createdAt||x.date,kind:'invoice',title:x.credit?'Kreeditarve {0}':'Arve {0}',n:x.number,meta:[who,eur(x.gross)].concat(x.credit&&x.creditFor?[num(x.creditFor)]:[]).filter(Boolean).join(' · '),go:{i:x.id}});

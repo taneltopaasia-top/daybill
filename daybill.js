@@ -20,7 +20,7 @@ const setView=document.createElement('section');setView.id='settingsView';setVie
 const backup=$d('backupDetails');
 
 const bar=document.createElement('header');bar.className='db-bar';
-bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button class="db-gear" data-view="settings">Seaded</button></div>`;
+bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button type="button" class="db-ico" id="dbLangBtn"></button><button type="button" class="db-ico" id="dbThemeBtn"></button><button class="db-gear" data-view="settings">Seaded</button></div>`;
 document.body.prepend(bar);
 let view='hours';
 const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView],['history',()=>$d('historyView')]];
@@ -64,7 +64,7 @@ function renderClock(){const p=cp();clearInterval(tick);
   ${c?`<div class="clock-field"><label for="ckComment">Kommentaar (valikuline)</label><input id="ckComment" maxlength="500" value="${escH(c.comment||'')}" placeholder="nt kolimine, lisatöö"></div>`:''}
   <div class="clock-btns">${c?`<button id="ckPause">${c.pausedAt?'Jätka':'Paus'}</button><button id="ckWrap" class="primary">Wrap · lõpeta</button>`:`<button id="ckCall" class="primary wide">Call · alusta tööd</button>`}</div>
   <p class="error" id="ckError" role="alert"></p>
-  <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<div class="row-item"><span>${escH(dayLabel(e.date))}<br>${escH(e.start)} → ${escH(e.end)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></div>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
+  <div class="clock-list"><h2>Viimased päevad · ${escH(p.name)}</h2>${recent.length?recent.map(e=>`<div class="row-item"><span>${escH(dayLabel(e.date))}<br>${e.start?escH(e.start)+' → '+escH(e.end):escH(e.comment||(DAY_TYPES[e.dayType]||DAY_TYPES.custom).et)}${e.breaks?' · paus '+e.breaks+' min':''}</span><span>${h(e.mins)}${e.ot||e.dbl?'<br>'+h(e.ot+e.dbl+(e.trip||0))+' ületunde':''}</span></div>`).join(''):'<div class="empty">Veel pole ühtegi päeva.</div>'}
   ${t?`<p class="help">Kokku ${h(t.mins)} · ${money(t.net)} ilma KM-ta.</p><div class="actions"><button type="button" id="ckPreview2">Vaata eelvaadet</button></div>`:''}</div></div>`;
  if(optForm){state.selected=p.id;try{render()}catch(e){}$d('ckOptsSlot').append(optForm)}
  $d('ckTipX')&&($d('ckTipX').onclick=()=>{setFlag(TOUR,null);renderClock()});$d('ckPreview')&&($d('ckPreview').onclick=()=>{if(lastWrap)setFlag(TOUR,null);openPreview(p.id)});$d('ckPreview2')&&($d('ckPreview2').onclick=()=>openPreview(p.id));
@@ -211,8 +211,8 @@ let pdfMode='save';
 function mailText(proj){const en=proj.reportLang!=='et';let t=null;try{t=projectTotals(proj)}catch(e){}const S=window.DaybillSettings.get(),who=proj.worker||S.approver||S.name||'';
  const days=(proj.entries||[]).map(e=>e.date).sort(),per=days.length?(days[0]===days[days.length-1]?dmyS(days[0]):dmyS(days[0])+' – '+dmyS(days[days.length-1])):'';
  const m=n=>(Math.round((Number(n)||0)*100)/100).toLocaleString(en?'en-GB':'et-EE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
- return en?{subject:`${proj.name} · work summary`,body:`Hello,\n\nplease find attached my work summary for ${proj.name}${per?' ('+per+')':''}.\n${t?`Total excl. VAT: ${m(t.net)}\nVAT: ${m(t.vat)}\nTotal: ${m(t.gross)}\n`:''}\nIf everything is correct, please confirm and I will send the invoice.\n\nBest regards,\n${who}${S.phone?'\n'+S.phone:''}`}
-  :{subject:`${proj.name} · tööaja ülevaade`,body:`Tere!\n\nSaadan manuses projekti ${proj.name}${per?' ('+per+')':''} tööaja ülevaate.\n${t?`Summa ilma KM-ta: ${m(t.net)}\nKM: ${m(t.vat)}\nKokku: ${m(t.gross)}\n`:''}\nKui kõik on korras, palun kinnita ja saadan arve.\n\nParimate soovidega\n${who}${S.phone?'\n'+S.phone:''}`}}
+ return en?{subject:`${proj.name} · working time and cost overview`,body:`Hello,\n\nplease find attached my working time and cost overview for ${proj.name}${per?' ('+per+')':''}.\n${t?`Total excl. VAT: ${m(t.net)}\nVAT: ${m(t.vat)}\nTotal: ${m(t.gross)}\n`:''}\nIf everything is correct, please confirm and I will send the invoice.\n\nBest regards,\n${who}${S.phone?'\n'+S.phone:''}`}
+  :{subject:`${proj.name} · tööaja ja kulude ülevaade`,body:`Tere!\n\nSaadan manuses projekti ${proj.name}${per?' ('+per+')':''} tööaja ja kulude ülevaate.\n${t?`Summa ilma KM-ta: ${m(t.net)}\nKM: ${m(t.vat)}\nKokku: ${m(t.gross)}\n`:''}\nKui kõik on korras, palun kinnita ja saadan arve.\n\nParimate soovidega\n${who}${S.phone?'\n'+S.phone:''}`}}
 function dmyS(d){const [y,m,dd]=String(d).split('-');return dd+'.'+m+'.'+y}
 async function pdfOut(bytes,name){const mode=pdfMode;pdfMode='save';const blob=new Blob([bytes],{type:'application/pdf'});let proj=null;try{proj=p()}catch(e){}
  const file=typeof File==='function'?new File([blob],name,{type:'application/pdf'}):null,txt=proj?mailText(proj):{subject:name,body:''};
@@ -250,7 +250,15 @@ function theme(){try{return localStorage.getItem('daybill.theme')==='light'?'lig
 function setTheme(t){t=t==='light'?'light':'dark';try{localStorage.setItem('daybill.theme',t)}catch(e){}document.documentElement.dataset.theme=t;const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='light'?'#ffffff':'#121212';markTheme()}
 const themeBtn=document.createElement('div');themeBtn.id='themeSwitch';themeBtn.setAttribute('role','group');themeBtn.setAttribute('aria-label','Välimus');
 themeBtn.innerHTML='<button type="button" data-t="light">Hele</button><button type="button" data-t="dark">Tume</button>';
-function markTheme(){const t=theme();themeBtn.querySelectorAll('button').forEach(b=>{b.classList.toggle('primary',b.dataset.t===t);b.setAttribute('aria-pressed',b.dataset.t===t)})}
+const SUN='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',MOON='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+// Riba ikoonid: keel (EN/ET) ja hele/tume. Silt on CSS-is (data-code), et keelevahetus seda ei tõlgiks.
+function markBar(){const lb=$d('dbLangBtn'),tb=$d('dbThemeBtn');const L=(window.HoursI18n&&window.HoursI18n.lang)||'en';
+ if(lb){lb.dataset.code=L==='et'?'ET':'EN';lb.setAttribute('aria-label',L==='et'?'Keel: eesti. Vaheta inglise keelele':'Language: English. Switch to Estonian');lb.title=lb.getAttribute('aria-label')}
+ if(tb){const t=theme();tb.innerHTML=t==='dark'?MOON:SUN;tb.setAttribute('aria-label',L==='et'?(t==='dark'?'Tume. Vaheta heledaks':'Hele. Vaheta tumedaks'):(t==='dark'?'Dark. Switch to light':'Light. Switch to dark'));tb.title=tb.getAttribute('aria-label')}}
+$d('dbLangBtn')&&($d('dbLangBtn').onclick=()=>{const H=window.HoursI18n;if(!H)return;H.set(H.lang==='et'?'en':'et');markBar();try{if(view==='settings')renderSettings()}catch(e){}});
+window.addEventListener('hourslangchange',()=>{markBar();try{if(view==='history')window.daybillHistory()}catch(e){}});
+$d('dbThemeBtn')&&($d('dbThemeBtn').onclick=()=>{setTheme(theme()==='dark'?'light':'dark')});
+function markTheme(){try{markBar()}catch(e){}const t=theme();themeBtn.querySelectorAll('button').forEach(b=>{b.classList.toggle('primary',b.dataset.t===t);b.setAttribute('aria-pressed',b.dataset.t===t)})}
 themeBtn.querySelectorAll('button').forEach(b=>b.onclick=()=>{setTheme(b.dataset.t);if(view==='settings')renderSettings()});
 markTheme();
 
@@ -312,6 +320,48 @@ const run=document.createElement('p');run.className='help';run.id='dbRunning';$d
 function running(){const on=state.projects.filter(x=>!x.deleted&&x.clock);run.innerHTML=on.map(x=>`<strong>Tööl praegu:</strong> ${escH(x.name)} · alates ${hm(new Date(x.clock.start))}${x.clock.pausedAt?' (paus)':''} · ${fmt(elapsed(x.clock)).slice(0,5)} h`).join('<br>')}
 running();setInterval(running,30000);
 // Projekti päis: summa ja kaks põhinuppu (saada produtsendile, tee arve). Hoursi tuum joonistab ülejäänu.
+/* ---------- Lisa päev: võttepäev, prep päev või muu päev kokkulepitud summaga ---------- */
+function fullDay(pr){try{if(dayMode(pr))return Number(pr.dayRate);const R=rulesOf(pr);if(R)return Number(pr.rate)*R.day}catch(e){}return 0}
+function addDays(iso,n){const d=new Date(iso+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createElement('dialog');dlg.id='dbDayDlg';dlg.className='db-day-dlg';document.body.append(dlg)}
+ const fd=fullDay(pr),first=(pr.entries||[]).map(e=>e.date).sort()[0];
+ let kind=edit?(hasPay(edit)?(edit.dayType==='prep'?'prep':'custom'):'shoot'):'prep';
+ const payMode=edit&&hasPay(edit)?(fd&&Math.abs(edit.pay-fd)<0.005?'full':fd&&Math.abs(edit.pay-fd/2)<0.005?'half':'own'):fd?'full':'own';
+ const date0=edit?edit.date:first?addDays(first,-1):new Date().toISOString().slice(0,10);
+ dlg.innerHTML=`<form method="dialog" id="ddForm"><h2>${edit?'Muuda päeva':'Lisa päev'}</h2>
+ <div class="dd-kind" role="group" aria-label="Päeva liik"><button type="button" data-k="shoot">Võttepäev</button><button type="button" data-k="prep">Prep päev</button><button type="button" data-k="custom">Muu päev</button></div>
+ <div class="dd-grid"><div><label for="ddDate">${edit?'Kuupäev':'Esimene päev'}</label><input id="ddDate" type="date" value="${date0}" required></div>
+ ${edit?'':`<div><label for="ddCount">Mitu päeva järjest</label><input id="ddCount" type="text" inputmode="numeric" value="1"></div>`}</div>
+ <div class="dd-pay"><label for="ddPay">Tasu päeva eest (ilma KM-ta)</label><select id="ddPay">${fd?`<option value="full">Täispäev · ${money(fd)}</option><option value="half">Pool päeva · ${money(fd/2)}</option>`:''}<option value="own">Oma summa</option></select>
+ <div id="ddOwnBox"><label for="ddOwn">Summa · €</label><input id="ddOwn" type="text" inputmode="decimal" placeholder="nt 150" value="${edit&&hasPay(edit)?String(edit.pay).replace('.',','):''}"></div></div>
+ <div class="dd-times"><p class="help dd-opt">Kellaajad (valikuline)</p><div class="dd-grid"><div><label for="ddStart">Algus</label><input id="ddStart" type="time" value="${edit?edit.start||'':''}"></div><div><label for="ddEnd">Lõpp</label><input id="ddEnd" type="time" value="${edit?edit.end||'':''}"></div></div></div>
+ <div><label for="ddNote">Kirjeldus (valikuline)</label><input id="ddNote" maxlength="200" placeholder="nt valgustehnika ettevalmistus" value="${edit?escH(edit.comment||''):''}"></div>
+ <p class="error" id="ddErr" role="alert"></p>
+ <div class="actions"><button type="submit" class="primary" id="ddSave">${edit?'Salvesta':'Lisa'}</button><button type="button" id="ddCancel">Loobu</button></div></form>`;
+ const $k=()=>dlg.querySelectorAll('[data-k]');
+ const sync=()=>{$k().forEach(b=>{b.classList.toggle('primary',b.dataset.k===kind);b.setAttribute('aria-pressed',b.dataset.k===kind)});const shoot=kind==='shoot';
+  dlg.querySelector('.dd-pay').hidden=shoot;$d('ddOwnBox').hidden=shoot||$d('ddPay').value!=='own';dlg.querySelector('.dd-opt').hidden=shoot;
+  $d('ddNote').placeholder=kind==='prep'?'nt valgustehnika ettevalmistus':kind==='custom'?'nt kolimine, laadimine':'nt eriti pikk võttepäev'};
+ $d('ddPay').value=payMode;$k().forEach(b=>b.onclick=()=>{kind=b.dataset.k;sync()});$d('ddPay').onchange=sync;sync();
+ let touched=!!edit;$d('ddDate').oninput=()=>{touched=true};const cnt=$d('ddCount');if(cnt)cnt.oninput=()=>{const n=Math.round(Number(cnt.value));if(!touched&&first&&n>=1&&n<=31)$d('ddDate').value=addDays(first,-n)};
+ $d('ddCancel').onclick=()=>dlg.close();
+ $d('ddForm').onsubmit=ev=>{ev.preventDefault();const err=$d('ddErr');err.textContent='';
+  try{const date=$d('ddDate').value;if(!date)throw Error('Vali kuupäev.');
+   const n=edit?1:Math.round(Number(String($d('ddCount').value).replace(',','.')));if(!(n>=1&&n<=31))throw Error('Päevade arv peab olema 1 kuni 31.');
+   const start=$d('ddStart').value,end=$d('ddEnd').value,note=$d('ddNote').value.trim();
+   if(kind==='shoot'&&(!start||!end))throw Error('Võttepäeval kirjuta algus ja lõpp.');
+   if((start&&!end)||(!start&&end))throw Error('Kirjuta nii algus kui lõpp või jäta mõlemad tühjaks.');
+   let pay=null;if(kind!=='shoot'){const m=$d('ddPay').value;pay=m==='full'?fd:m==='half'?Math.round(fd*50)/100:Number(String($d('ddOwn').value).replace(/\s/g,'').replace(',','.'));if(!(pay>=0)||!Number.isFinite(pay)||String($d('ddOwn').value).trim()===''&&m==='own')throw Error('Kirjuta summa eurodes, näiteks 150.');}
+   if(kind==='shoot'&&!String(pr.job||'').trim())throw Error('Sisesta enne projekti valikutes amet.');
+   const made=[];for(let i=0;i<n;i++){const d=addDays(date,i);const endDate=start&&end&&end<=start?addDays(d,1):d;
+    const e={id:edit?edit.id:Date.now().toString(36)+Math.random().toString(36).slice(2),date:d,endDate,start:start||'',end:end||'',job:edit?edit.job:pr.job||'',rate:edit?edit.rate:pr.rate};
+    if(note)e.comment=note;if(kind!=='shoot'){e.pay=pay;e.dayType=kind}
+    if(start&&end){if(kind==='shoot')duration(e);const a=Date.parse(d+'T'+start+'Z'),b=Date.parse(endDate+'T'+end+'Z');if(pr.entries.some(x=>x.id!==e.id&&x.start&&x.end&&a<Date.parse(shiftEndDate(x)+'T'+x.end+'Z')&&b>Date.parse(x.date+'T'+x.start+'Z')))throw Error(`${d.split('-').reverse().join('.')} kattub olemasoleva tööpäevaga.`)}
+    made.push(e)}
+   if(edit)pr.entries=pr.entries.map(x=>x.id===edit.id?made[0]:x);else pr.entries.push(...made);
+   save();render();dlg.close()}catch(e){err.textContent=e.message}};
+ dlg.showModal()}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-edit]');if(!b)return;let pr=null;try{pr=p()}catch(x){}const en=pr&&pr.entries.find(x=>x.id===b.dataset.edit);if(en&&hasPay(en)){e.stopImmediatePropagation();e.preventDefault();dayDialog(pr,en)}},true);
 function decorate(){
  document.querySelectorAll('#projects .project-meta').forEach(m=>{const n=m.firstChild;if(n&&n.nodeType===3){const x=n.nodeValue.replace(/^\s*·\s*/,'');if(x!==n.nodeValue)n.nodeValue=x}});
  let proj=null;try{proj=projectExpanded?p():null}catch(e){}
@@ -323,7 +373,9 @@ function decorate(){
  let io=null;try{io=invoiceOnly(proj)}catch(e){}
  let days=0;try{days=workDays(proj,io)}catch(e){days=new Set((proj.entries||[]).map(e=>e.date)).size}
  const gross=io?io.gross:t?t.gross:0,net=io?io.net:t?t.net:0;
- hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(gross)}</strong><span class="help">${[`ilma KM-ta ${money(net)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:io?['tunnid teadmata']:[]).join(' · ')}</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-link" id="dbPdf">Salvesta PDF</button></div>`;
+ hero.innerHTML=`<div class="db-hero-sum"><span class="help">Kokku koos KM-ga</span><strong>${money(gross)}</strong><span class="help">${[`ilma KM-ta ${money(net)}`,days===1?`${days} päev`:`${days} päeva`].concat(t&&t.mins?[h(t.mins)]:io?['tunnid teadmata']:[]).join(' · ')}</span><span class="help">Produtsent saab tööaja ja kulude ülevaate (PDF).</span></div><div class="db-hero-btns"><button type="button" class="primary" id="dbSend">Saada produtsendile</button><button type="button" id="dbBill">Tee arve</button><button type="button" class="db-addday" id="dbAddDay">+ Lisa päev · prep, võttepäev või muu</button><button type="button" class="db-link" id="dbPdf">Salvesta tööaja ja kulude ülevaade (PDF)</button></div>`;
+ $d('dbAddDay').onclick=()=>dayDialog(proj);
+ {const dh=$d('daysHeading');if(dh&&!$d('dbAddDay2')){const b=document.createElement('button');b.type='button';b.id='dbAddDay2';b.className='db-addday2';b.textContent='+ Lisa päev';dh.append(b)}const b2=$d('dbAddDay2');if(b2)b2.onclick=e=>{e.preventDefault();dayDialog(proj)}}
  $d('dbSend').onclick=()=>{const b=$d('pdfMail');b&&b.click()};
  $d('dbBill').onclick=()=>{const b=$d('invoiceTab');b&&b.click()};
  $d('dbPdf').onclick=()=>{const b=$d('pdf');b&&b.click()}}
