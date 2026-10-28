@@ -322,3 +322,10 @@ td,th{border-bottom-color:var(--line)}
 /* iPad: kõik ühele reale (ka „Logi sisse” täpiga) */
 @media(min-width:651px) and (max-width:1100px){.db-bar-in{flex-wrap:nowrap;gap:8px;padding:10px 16px}.db-brand{min-width:0}.db-nav{gap:2px}.db-nav button{padding:8px 9px;gap:6px}.db-gear{padding:6px 10px;white-space:nowrap}}
 @media(min-width:651px) and (max-width:900px){.db-nav button svg{display:none}}
+/* Tööaja eelvaade: avatud projekt üksi, nimekiri peidus */
+#hoursView.db-focus .project-card.db-other,#hoursView.db-focus .project-add,#hoursView.db-focus .actions:has(#activeProjects),#hoursView.db-focus #collectionHelp{display:none}
+.db-link{background:none;border:0;padding:4px 0;min-height:0;color:var(--muted);font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.db-link:hover{color:var(--fg);background:none}
+.db-back{display:block;margin:0 0 6px;text-decoration:none}
+.ck-lab{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.db-back[hidden]{display:none}

@@ -20,7 +20,7 @@ const setView=document.createElement('section');setView.id='settingsView';setVie
 const backup=$d('backupDetails');
 
 const bar=document.createElement('header');bar.className='db-bar';
-bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button type="button" class="db-conn" id="dbConn" data-s="wait"><i aria-hidden="true"></i><span></span></button><button type="button" class="db-ico" id="dbLangBtn"></button><button type="button" class="db-ico" id="dbThemeBtn"></button><button class="db-gear" data-view="settings">Seaded</button></div>`;
+bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M8 13h8M8 16.5h5"/></svg><span>Eelvaade</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button type="button" class="db-conn" id="dbConn" data-s="wait"><i aria-hidden="true"></i><span></span></button><button type="button" class="db-ico" id="dbLangBtn"></button><button type="button" class="db-ico" id="dbThemeBtn"></button><button class="db-gear" data-view="settings">Seaded</button></div>`;
 document.body.prepend(bar);
 let view='hours';
 const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView],['history',()=>$d('historyView')]];
@@ -37,7 +37,12 @@ function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum
  if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}if(view==='hours')try{render()}catch(e){}if(view==='history')try{window.daybillHistory()}catch(e){console.error(e)}
  window.scrollTo(0,0)}
 window.daybillShow=show;
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#ckAll,#dbAllProj');if(t){e.preventDefault();allProjects()}});
 bar.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
+// Eelvaade avab kella projekti tööaja eelvaate; „Kõik projektid” viib projektide nimekirja.
+bar.querySelector('[data-view="hours"]').onclick=()=>{const x=cp();if(!x){show('hours');return}state.selected=x.id;try{archiveView=false;projectExpanded=true;setStage('hours')}catch(e){}save();show('hours')};
+function allProjects(){try{projectExpanded=false}catch(e){}show('hours')}
+window.daybillAllProjects=allProjects;
 
 /* ---------- kell ---------- */
 let clockProject=null,tick=null,lastWrap=null;
@@ -56,7 +61,7 @@ function renderClock(){const p=cp();clearInterval(tick);
  const t=(()=>{try{return projectTotals(p,rows)}catch(e){return null}})();
  const recent=[...rows].sort((a,b)=>(b.date+b.start).localeCompare(a.date+a.start)).slice(0,5);
  clockView.innerHTML=`<div class="clock">
-  ${tourTip(p)}<div class="clock-field"><label for="ckProject">Projekt</label><select id="ckProject">${active().map(x=>`<option value="${escH(x.id)}"${x.id===p.id?' selected':''}>${escH(x.name)}${x.clock?' · tööl':''}</option>`).join('')}<option value="__new">+ Uus projekt…</option></select></div>
+  ${tourTip(p)}<div class="clock-field"><div class="ck-lab"><label for="ckProject">Projekt</label><button type="button" class="db-link" id="ckAll">Kõik projektid</button></div><select id="ckProject">${active().map(x=>`<option value="${escH(x.id)}"${x.id===p.id?' selected':''}>${escH(x.name)}${x.clock?' · tööl':''}</option>`).join('')}<option value="__new">+ Uus projekt…</option></select></div>
   <div id="ckNew" class="hidden">${newProjectHtml()}</div>
   ${lastWrap&&lastWrap.pid===p.id&&!c?`<div class="set-note ck-done" role="status"><strong>✓ Päev salvestatud</strong><br>${escH(lastWrap.text)}<div class="actions" style="margin:12px 0 0"><button type="button" id="ckPreview" class="primary">Tee arve eelvaade</button><button type="button" id="ckNewProject">Alusta uut projekti</button></div></div>`:''}
   <details class="ck-opts" id="ckOpts"${p.job?'':' open'}><summary>Projekti valikud · ${p.job?escH(p.job)+' · '+escH(priceLabel(p)):'amet, hind, tööreeglid'}</summary><p class="help">Need valikud kehtivad selle projekti kohta: amet, hind, ületunnid ja tööreeglid (Reklaam 10 h, Film 12 h või oma valik). Muudatused salvestuvad nupuga „Salvesta hind ja reeglid” või kui vajutad „Alusta tööd”.</p><div id="ckOptsSlot"></div></details>
@@ -369,6 +374,12 @@ function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createE
  dlg.showModal()}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-edit]');if(!b)return;let pr=null;try{pr=p()}catch(x){}const en=pr&&pr.entries.find(x=>x.id===b.dataset.edit);if(en&&hasPay(en)){e.stopImmediatePropagation();e.preventDefault();dayDialog(pr,en)}},true);
 function decorate(){
+ // Avatud projekt = tööaja eelvaade (ainult see projekt); suletud = projektide nimekiri.
+ {let open=null;try{open=projectExpanded?p():null}catch(e){}hoursView.classList.toggle('db-focus',!!open);
+  const h1=hoursView.querySelector('.row.top h1');if(h1){const t=open?'Tööaja eelvaade':'Projektid';if(h1.textContent!==t&&h1.dataset.t!==t){h1.textContent=t;h1.dataset.t=t}}
+  let back=$d('dbAllProj');if(open&&!back){back=document.createElement('button');back.type='button';back.id='dbAllProj';back.className='db-link db-back';back.textContent='← Kõik projektid';const top=hoursView.querySelector('.row.top');top&&top.before(back)}
+  if(back)back.hidden=!open;
+  document.querySelectorAll('#projects .project-card').forEach(c=>c.classList.toggle('db-other',!!open&&!c.querySelector('.project-toggle.active')))}
  document.querySelectorAll('#projects .project-meta').forEach(m=>{const n=m.firstChild;if(n&&n.nodeType===3){const x=n.nodeValue.replace(/^\s*·\s*/,'');if(x!==n.nodeValue)n.nodeValue=x}});
  let proj=null;try{proj=projectExpanded?p():null}catch(e){}
  let hero=$d('dbHero');const box=$d('approvalBox');

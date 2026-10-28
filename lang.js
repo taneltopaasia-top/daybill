@@ -1733,7 +1733,10 @@ const EN=/*EN-START*/{
 "Sünkroonitud":"Synced",
 "Pole ühendatud":"Not connected",
 "Mõni muudatus pole veel pilve jõudnud. Kui logid nüüd välja, kaovad need sellest seadmest. Oota paar sekundit, kuni ülal on roheline täpp, ja proovi uuesti. Kas login ikkagi välja?":"Some changes haven’t reached the cloud yet. If you sign out now, they’ll be lost from this device. Wait a few seconds until the dot at the top turns green, then try again. Sign out anyway?",
-"Login välja. Sinu projektid ja arved jäävad kontole alles ning see seade tühjendatakse. Järgmine kord logi sama e-postiga sisse ja kõik tuleb tagasi.":"Signing you out. Your projects and invoices stay safe in your account, and this device is cleared. Next time, sign in with the same email and everything comes back."
+"Login välja. Sinu projektid ja arved jäävad kontole alles ning see seade tühjendatakse. Järgmine kord logi sama e-postiga sisse ja kõik tuleb tagasi.":"Signing you out. Your projects and invoices stay safe in your account, and this device is cleared. Next time, sign in with the same email and everything comes back.",
+"Tööaja eelvaade":"Working hours preview",
+"Kõik projektid":"All projects",
+"← Kõik projektid":"← All projects"
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
