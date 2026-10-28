@@ -4,7 +4,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .db-bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--fg);padding-top:env(safe-area-inset-top)}
 .db-bar-in{max-width:940px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:14px}
 .db-brand{font-size:19px;font-weight:600;letter-spacing:-.5px;flex:1;display:flex;align-items:center;gap:9px}
-.db-brand img{width:26px;height:26px;border-radius:6px}
+.db-brand img{width:26px;height:26px;border-radius:0}
 .db-nav{display:flex;gap:6px}
 .db-gear{order:3;min-height:36px;padding:7px 12px}
 .db-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -74,7 +74,7 @@ main{margin-top:34px}
 /* Paigaldamise riba */
 .db-install{border-bottom:1px solid var(--fg);background:var(--bg)}
 .db-install-in{max-width:940px;margin:0 auto;padding:10px 24px;display:flex;gap:12px;align-items:center;font-size:13px;line-height:1.5}
-.db-install-in img{width:36px;height:36px;border-radius:8px;flex:none}
+.db-install-in img{width:36px;height:36px;border-radius:0;flex:none}
 .db-install-in p{margin:0;flex:1}
 .db-install-in button{min-height:34px;padding:6px 12px;white-space:nowrap}
 .db-share{display:inline-block;width:14px;height:16px;vertical-align:-2px}
