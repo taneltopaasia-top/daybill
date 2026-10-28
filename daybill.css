@@ -329,3 +329,7 @@ td,th{border-bottom-color:var(--line)}
 .db-back{display:block;margin:0 0 6px;text-decoration:none}
 .ck-lab{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .db-back[hidden]{display:none}
+.db-moved{max-width:940px;margin:12px auto 0;padding:12px 16px;border:1px solid var(--line);font-size:14px;line-height:1.45}.db-moved a{color:inherit}
+/* Kitsas telefon (320 px): menüü ja kellaajad mahuvad */
+@media(max-width:650px){.db-nav{grid-template-columns:repeat(4,minmax(0,1fr))}.db-nav button{min-width:0}.db-nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis}.entry-grid>*{min-width:0}.entry-grid input{min-width:0;width:100%}}
+@media(max-width:360px){.db-nav button{font-size:10.5px;padding:6px 1px}}

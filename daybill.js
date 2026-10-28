@@ -2,6 +2,10 @@
    Kasutab Hoursi tuuma (state, save, render, calculate, projectTotals) samast lehest. */
 'use strict';
 (function(){
+// Daybilli aadress on daybill-app.web.app. Vana github.io aadress suunab sinna, kui seadmes pole pilve saatmata projekte.
+const HOME='https://daybill-app.web.app/';let moved=false;
+if(/github\.io$/.test(location.hostname)){let has=false,synced=false;try{has=((JSON.parse(localStorage.getItem('daybill.v1')||'{}').projects)||[]).length>0;synced=!!localStorage.getItem('daybill.owner')||Object.keys(localStorage).some(k=>k.startsWith('daybill.pushed.'))}catch(e){}
+ if(!has||synced){location.replace(HOME+location.search+location.hash);return}moved=true}
 const $d=id=>document.getElementById(id);
 const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
@@ -22,6 +26,7 @@ const backup=$d('backupDetails');
 const bar=document.createElement('header');bar.className='db-bar';
 bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16"/><path d="M3 9h18M8 13h8M8 16.5h5"/></svg><span>Eelvaade</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button type="button" class="db-conn" id="dbConn" data-s="wait"><i aria-hidden="true"></i><span></span></button><button type="button" class="db-ico" id="dbLangBtn"></button><button type="button" class="db-ico" id="dbThemeBtn"></button><button class="db-gear" data-view="settings">Seaded</button></div>`;
 document.body.prepend(bar);
+if(moved){const n=document.createElement('div');n.className='db-moved';n.innerHTML='<strong>Daybill kolis aadressile <a href="'+HOME+'">daybill-app.web.app</a>.</strong> <span>Sinu projektid on praegu ainult selles seadmes. Loo Seadetes tasuta konto, siis ava uus aadress ja logi sama kontoga sisse: kõik tuleb kaasa.</span>';bar.after(n)}
 let view='hours';
 const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView],['history',()=>$d('historyView')]];
 // Projekti valikud (Hoursi seadete vorm) on kellas; eelvaates tagasi oma kohal.
@@ -201,7 +206,7 @@ function renderSettings(){const lang=(window.HoursI18n&&window.HoursI18n.lang)||
  <div class="section"><h2>Sünkroonimine telefoni ja arvuti vahel</h2><div id="syncBox"></div></div>
  <div class="section" id="storageBox"><h2>Mälu ja piirid</h2>${storageHtml()}</div>
  <div class="section" id="backupBox"><h2>Varukoopia</h2></div>
- <div class="section"><h2>Paigalda rakendusena</h2><p class="help">iPhone: ava see leht Safaris → Jaga → „Lisa avakuvale”. Mac: Safari → Fail → „Lisa Docki”. Android ja Chrome: menüü → „Installi rakendus”. Daybill töötab ka ilma internetita; muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.</p></div>
+ <div class="section"><h2>Paigalda rakendusena</h2><p class="help">iPhone: ava see leht Safaris → Jaga → „Lisa avakuvale”. Android: Chrome'is menüü ⋮ → „Installi rakendus” või „Lisa avakuvale”. Arvutis: Chrome'is või Edge'is aadressiriba paremas otsas „Installi”, Macis Safaris Fail → „Lisa Docki”. Paigaldamata töötab Daybill ka igas brauseris. See töötab ka ilma internetita; muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.</p></div>
  <p class="help">Daybill · tasuta tööaja ja arvete rakendus filmitegijatele.</p>`;
  if(backup){$d('backupBox').append(backup);backup.open=true;backup.style.margin='0'}
  setView.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{try{window.HoursI18n&&window.HoursI18n.set(b.dataset.lang)}catch(e){}try{localStorage.setItem('hoursLang',b.dataset.lang)}catch(e){}renderSettings()});
@@ -248,6 +253,9 @@ window.addEventListener('appinstalled',()=>{installBar&&installBar.remove()});
 if(iosSafari)showInstall(T_('Lisa Daybill oma avakuvale: vajuta all Jaga {0} ja siis „Lisa avakuvale”.',SHARE_ICON));
 else if(ios)showInstall(T_('Lisa Daybill oma avakuvale: ava see link Safaris, vajuta Jaga {0} ja siis „Lisa avakuvale”.',SHARE_ICON));
 else if(macSafari)showInstall('Lisa Daybill Docki: Safari menüü Fail → „Lisa Docki”.');
+// Android: kui brauser ise „Paigalda” akent ei paku (nt Firefox, vanem Chrome), näidatakse menüü juhis.
+const android=/Android/i.test(navigator.userAgent);
+if(android)setTimeout(()=>{if(!installEvt&&!standalone)showInstall(/Firefox/i.test(navigator.userAgent)?'Lisa Daybill oma avakuvale: vajuta brauseri menüüd ⋮ ja vali „Installi” või „Lisa avakuvale”.':'Lisa Daybill oma avakuvale: vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.')},4000);
 
 /* ---------- hele / tume ---------- */
 // Kaks valikut: tume (vaikimisi) ja hele.

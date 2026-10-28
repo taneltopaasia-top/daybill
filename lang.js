@@ -1736,7 +1736,12 @@ const EN=/*EN-START*/{
 "Login välja. Sinu projektid ja arved jäävad kontole alles ning see seade tühjendatakse. Järgmine kord logi sama e-postiga sisse ja kõik tuleb tagasi.":"Signing you out. Your projects and invoices stay safe in your account, and this device is cleared. Next time, sign in with the same email and everything comes back.",
 "Tööaja eelvaade":"Working hours preview",
 "Kõik projektid":"All projects",
-"← Kõik projektid":"← All projects"
+"← Kõik projektid":"← All projects",
+"Daybill kolis aadressile":"Daybill has moved to",
+"Sinu projektid on praegu ainult selles seadmes. Loo Seadetes tasuta konto, siis ava uus aadress ja logi sama kontoga sisse: kõik tuleb kaasa.":"Your projects are only on this device right now. Create a free account in Settings, then open the new address and sign in with the same account: everything comes with you.",
+"iPhone: ava see leht Safaris → Jaga → „Lisa avakuvale”. Android: Chrome'is menüü ⋮ → „Installi rakendus” või „Lisa avakuvale”. Arvutis: Chrome'is või Edge'is aadressiriba paremas otsas „Installi”, Macis Safaris Fail → „Lisa Docki”. Paigaldamata töötab Daybill ka igas brauseris. See töötab ka ilma internetita; muudatused jõuavad teise seadmesse, kui ühendus tuleb tagasi.":"iPhone: open this page in Safari → Share → “Add to Home Screen”. Android: in Chrome, menu ⋮ → “Install app” or “Add to Home screen”. Computer: in Chrome or Edge, “Install” at the right end of the address bar; on a Mac in Safari, File → “Add to Dock”. Without installing, Daybill works in any browser too. It also works offline; changes reach your other devices when the connection is back.",
+"Lisa Daybill oma avakuvale: vajuta brauseri menüüd ⋮ ja vali „Installi” või „Lisa avakuvale”.":"Add Daybill to your home screen: tap the browser menu ⋮ and choose “Install” or “Add to Home screen”.",
+"Lisa Daybill oma avakuvale: vajuta üleval paremal menüüd ⋮ ja vali „Installi rakendus” või „Lisa avakuvale”.":"Add Daybill to your home screen: tap the menu ⋮ at the top right and choose “Install app” or “Add to Home screen”."
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];
