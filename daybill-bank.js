@@ -52,7 +52,8 @@ function match(tx){const all=T().all(),open=all.filter(isOpen),pairs=[];
 let res=null,err='';
 async function readFile(file){err='';res=null;try{const st=parseStatement(decodeFile(await file.arrayBuffer()));const m=match(st.tx);const paid=[];
   for(const p of m.sure){const t=st.tx[p.ti];if(T().markPaid(p.id,t.date||today(),{payer:t.payer,desc:t.desc,amount:t.amount,bankId:t.id}))paid.push(p.id)}
-  res={from:st.from,to:st.to,n:st.tx.length,tx:st.tx,paid,check:m.check}}
+  res={from:st.from,to:st.to,n:st.tx.length,tx:st.tx,paid,check:m.check};
+  try{const all=T().all();window.DaybillLog&&window.DaybillLog.add({type:'bank',from:st.from,to:st.to,file:file.name||'',n:st.tx.length,paid:paid.map(id=>(all.find(x=>x.id===id)||{}).number).filter(Boolean),check:m.check.length})}catch(e){console.error(e)}}
  catch(e){err=e.message==='empty'?'Fail on tühi.':'Seda faili ei saanud lugeda. Ekspordi internetipangast konto väljavõte CSV või XML (camt.053) failina.'}
  T().render()}
 function line(x,extra){return `<li><strong>${escH(x.number)}</strong> · ${escH(x.client&&x.client.name)} · ${eur(x.gross)}${extra||''}</li>`}
@@ -69,12 +70,13 @@ function mount(el){if(!el)return;const I=T(),all=I.all(),get=id=>all.find(x=>x.i
   out+=wait.length?`<h3>Ootab makset: ${wait.length}</h3><ul>${wait.map(x=>line(x,` · tähtaeg ${dmy(x.due)}`)).join('')}</ul>`:'';
   if(!open.length)out+=`<p>Kõik arved on makstud.</p>`;
   out+=`<button type="button" class="db-link" id="dbBankClose">Peida</button></div>`}
- el.innerHTML=`<div class="db-bank" id="dbBankDrop"><div><strong>Pangaväljavõte</strong><p class="help">Lohista siia panga konto väljavõte või vali fail. Daybill märgib makstud arved ise. Fail jääb sinu seadmesse.</p></div><label class="db-bank-btn"><input type="file" id="dbBankFile" accept=".csv,.xml,.txt,text/csv,application/xml,text/xml" hidden>Vali fail</label></div><details class="db-bank-how"><summary>Kust ma selle faili saan?</summary><p class="help">Internetipangas ava konto väljavõte, vali periood (näiteks viimased 3 kuud) ja vajuta „Ekspordi”. Vali CSV või XML. Sobib Swedbank, SEB, LHV, Coop ja Luminor.</p></details>${out}`;
+ el.innerHTML=`<div class="db-bank" id="dbBankDrop"><div><strong>Pangaväljavõte</strong><p class="help">Lohista siia panga konto väljavõte või vali fail. Daybill märgib makstud arved ise. Fail jääb sinu seadmesse.</p></div><label class="db-bank-btn"><input type="file" id="dbBankFile" accept=".csv,.xml,.txt,text/csv,application/xml,text/xml" hidden>Vali fail</label></div>${(()=>{try{const L=window.DaybillLog,st=L.statements(),c=L.coverage();if(!st.length)return '';const s=st.slice().sort((a,b)=>b.at.localeCompare(a.at))[0];return `<p class="help db-bank-last">Viimati laaditud ${dmy(s.at.slice(0,10))} · kaetud kuni ${dmy(c.last)}${c.gaps.length?' · <strong>vahele jäi aeg</strong>':''} · <button type="button" class="db-link" id="dbBankHist">Kõik väljavõtted</button></p>`}catch(e){return ''}})()}<details class="db-bank-how"><summary>Kust ma selle faili saan?</summary><p class="help">Internetipangas ava konto väljavõte, vali periood (näiteks viimased 3 kuud) ja vajuta „Ekspordi”. Vali CSV või XML. Sobib Swedbank, SEB, LHV, Coop ja Luminor.</p></details>${out}`;
  const drop=el.querySelector('#dbBankDrop'),inp=el.querySelector('#dbBankFile');
  inp.onchange=()=>{const f=inp.files&&inp.files[0];if(f)readFile(f)};
  drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};drop.ondragleave=()=>drop.classList.remove('over');
  drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)readFile(f)};
  el.querySelectorAll('[data-bank-yes]').forEach(b=>b.onclick=()=>{const [ti,id]=b.dataset.bankYes.split('|');const t=res.tx[+ti];if(T().markPaid(id,t.date||today(),{payer:t.payer,desc:t.desc,amount:t.amount,bankId:t.id,manual:true})){res.paid.push(id);res.check=res.check.filter(p=>p.id!==id&&p.ti!==+ti)}T().render()});
+ const hb=el.querySelector('#dbBankHist');if(hb)hb.onclick=()=>window.daybillShow('history');
  const c=el.querySelector('#dbBankClose');if(c)c.onclick=()=>{res=null;err='';T().render()}}
 window.daybillBank=mount;
 window.DaybillBank={parseStatement,match};

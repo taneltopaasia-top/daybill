@@ -141,7 +141,7 @@ td,th{border-bottom-color:var(--line)}
 @media(max-width:650px){
  .db-bar-in{padding:10px 16px;flex-wrap:nowrap}
  .db-brand{font-size:20px}
- .db-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:auto;background:var(--bg);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+ .db-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:0;width:auto;background:var(--bg);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
  .db-nav button{flex-direction:column;gap:3px;font-size:11px;font-weight:600;padding:6px 2px;min-height:52px;justify-content:center}
  .db-nav button.primary{background:none;color:var(--fg)}
  .db-nav button.primary svg{stroke-width:2.4}
@@ -250,3 +250,36 @@ td,th{border-bottom-color:var(--line)}
 .db-bank-res ul{margin:0;padding-left:18px;line-height:1.7}
 .db-bank-res li button{margin:6px 0 8px;min-height:40px}
 @media(max-width:650px){.db-bank{flex-direction:column;align-items:stretch}.db-bank-btn{width:100%}}
+
+/* Ajalugu */
+.db-hist-intro{margin:10px 0 20px}
+.db-hist-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 28px}
+.db-hist-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:0;background:var(--card);padding:16px;min-height:0}
+.db-hist-card:hover{background:var(--card);outline:1px solid var(--fg)}
+.db-hist-card strong{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1.1;color:var(--fg)}
+.db-hist-card .help{margin:0}
+.db-hist-h{font-size:19px;margin:28px 0 12px}
+.db-hist-bank td{white-space:normal;vertical-align:top}
+.db-hist-filter{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);margin:0 0 14px}
+.db-hist-filter button{border:0;min-height:40px;font-size:13px;padding:6px 2px}
+.db-hist-month{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:22px 0 6px;font-weight:700}
+.db-hist-row{display:grid;grid-template-columns:150px 1fr;gap:12px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 0;min-height:0;color:var(--fg)}
+.db-hist-row:hover:not(:disabled){background:var(--card);color:var(--fg)}
+.db-hist-row:disabled{cursor:default;opacity:1}
+.db-hist-when{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.db-hist-what{display:flex;flex-direction:column;gap:2px}
+.db-hist-what .help{margin:0}
+#dhMore{margin:16px 0}
+@media(max-width:650px){
+ .db-hist-cards{grid-template-columns:1fr 1fr}
+ .db-hist-cards .db-hist-card:last-child{grid-column:1/-1}
+ .db-hist-row{grid-template-columns:1fr;gap:2px}
+ .db-hist-filter{grid-template-columns:repeat(3,1fr)}
+ .db-hist-bank thead{display:none}
+ .db-hist-bank tr{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+ .db-hist-bank td{border:0;padding:0}
+ .db-hist-bank td:first-child,.db-hist-bank td.db-span{grid-column:1/-1}
+ .db-hist-bank td:first-child{font-weight:700}
+ .db-m{display:inline!important;color:var(--muted)}
+}
+.db-m{display:none}

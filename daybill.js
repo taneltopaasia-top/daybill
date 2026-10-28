@@ -20,10 +20,10 @@ const setView=document.createElement('section');setView.id='settingsView';setVie
 const backup=$d('backupDetails');
 
 const bar=document.createElement('header');bar.className='db-bar';
-bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button></nav><button class="db-gear" data-view="settings">Seaded</button></div>`;
+bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><nav class="db-nav" aria-label="Menüü"><button data-view="clock"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg><span>Kell</span></button><button data-view="hours"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13"/><path d="M3 7l3-4M10 7l3-4M17 7l3-4"/></svg><span>Projektid</span></button><button data-view="inv"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg><span>Arved</span></button><button data-view="history"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>Ajalugu</span></button></nav><button class="db-gear" data-view="settings">Seaded</button></div>`;
 document.body.prepend(bar);
 let view='hours';
-const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView]];
+const VIEWS=[['clock',clockView],['hours',hoursView],['inv',()=>$d('invView')],['settings',setView],['history',()=>$d('historyView')]];
 // Projekti valikud (Hoursi seadete vorm) on kellas; eelvaates tagasi oma kohal.
 const optForm=$d('settings');
 // Eelvaates on valikud kokku pandud, et ülevaade jääks lihtne.
@@ -34,7 +34,7 @@ function optBack(){if(optForm&&optForm.parentNode!==optHome.parent)optHome.paren
 function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum')}catch(e){}}view=VIEWS.some(x=>x[0]===v)?v:'clock';if(view!=='clock')optBack();for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.toggle('hidden',k!==view)}
  bar.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('primary',b.dataset.view===view);b.toggleAttribute('aria-current',b.dataset.view===view)});
  try{localStorage.setItem(VIEW_KEY,view)}catch(e){}
- if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}if(view==='hours')try{render()}catch(e){}
+ if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}if(view==='hours')try{render()}catch(e){}if(view==='history')try{window.daybillHistory()}catch(e){console.error(e)}
  window.scrollTo(0,0)}
 window.daybillShow=show;
 bar.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
