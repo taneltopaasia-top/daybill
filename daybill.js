@@ -17,7 +17,7 @@ const invView=$d('invView');if(invView)main.append(invView);
 const clockView=document.createElement('section');clockView.id='clockView';clockView.className='db-view hidden';main.prepend(clockView);
 const setView=document.createElement('section');setView.id='settingsView';setView.className='db-view hidden';main.append(setView);
 // Seaded ja varukoopia: Hoursi andmefaili osa liigub seadetesse.
-const backup=hoursView.querySelector('details');
+const backup=$d('backupDetails');
 
 const bar=document.createElement('header');bar.className='db-bar';
 bar.innerHTML=`<div class="db-bar-in"><div class="db-brand"><img src="icons/icon-192.png" alt="">Daybill</div><span class="db-sync" id="dbSync"></span><button class="db-gear" data-view="settings" aria-label="Seaded">Seaded</button><nav class="db-nav"><button data-view="clock">Kell</button><button data-view="hours">Eelvaade</button><button data-view="inv">Arve</button></nav></div>`;
