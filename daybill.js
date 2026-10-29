@@ -37,8 +37,8 @@ const optForm=$d('settings');
 const pvOpts=document.createElement('details');pvOpts.className='ck-opts';pvOpts.id='dbPvOpts';pvOpts.innerHTML='<summary><span class="db-po-t">Projekti valikud</span><span class="db-po-s" id="dbPoS">amet, hind, tööreeglid</span></summary>';
 if(optForm){optForm.parentNode.insertBefore(pvOpts,optForm);pvOpts.append(optForm)}
 const optHome={parent:pvOpts,next:null};
-function optBack(){if(optForm&&optForm.parentNode!==optHome.parent)optHome.parent.insertBefore(optForm,optHome.next)}
-function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum')}catch(e){}}view=VIEWS.some(x=>x[0]===v)?v:'clock';if(view!=='clock')optBack();for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.toggle('hidden',k!==view)}
+function optBack(){return;if(optForm&&optForm.parentNode!==optHome.parent)optHome.parent.insertBefore(optForm,optHome.next)}
+function show(v){if(v==='sum'){v='inv';try{window.TraageldusInvoices.setTab('sum')}catch(e){}}if(v==='clock'||v==='hours'||v==='home'){for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.add('hidden')}view='home';bar.querySelectorAll('[data-view]').forEach(b=>{b.classList.remove('primary');b.removeAttribute('aria-current')});try{localStorage.setItem(VIEW_KEY,'home')}catch(e){}window.daybillHome&&window.daybillHome();return}window.daybillLeave&&window.daybillLeave(v);view=VIEWS.some(x=>x[0]===v)?v:'clock';if(view!=='clock')optBack();for(const [k,e] of VIEWS){const el=typeof e==='function'?e():e;el&&el.classList.toggle('hidden',k!==view)}
  bar.querySelectorAll('[data-view]').forEach(b=>{b.classList.toggle('primary',b.dataset.view===view);b.toggleAttribute('aria-current',b.dataset.view===view)});
  try{localStorage.setItem(VIEW_KEY,view)}catch(e){}
  if(view==='clock')renderClock();if(view==='settings')renderSettings();if(view==='inv')try{const T=window.TraageldusInvoices,c=cp();if(c&&(c.entries||[]).length&&c.job)T.autoProject(c.id);T.render()}catch(e){}if(view==='hours')try{render()}catch(e){}if(view==='history')try{window.daybillHistory()}catch(e){console.error(e)}
@@ -62,7 +62,7 @@ const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 function elapsed(c){const now=Date.now(),start=Date.parse(c.start),paused=(c.pauseSeconds||0)*1000+(c.pausedAt?now-Date.parse(c.pausedAt):0);return Math.max(0,now-start-paused)}
 function fmt(ms){const s=Math.floor(ms/1000);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
-function renderClock(){const p=cp();clearInterval(tick);
+function renderClock(){return;const p=cp();clearInterval(tick);
  if(!p){clockView.innerHTML=`<div class="clock"><h1>Kell</h1><div class="ck-tip ck-first" role="status"><strong>Loo esimene projekt.</strong><br><span>Kirjuta projekti nimi ja vali, kas see on reklaam, film või muu. Siis lisad oma ameti ja hinna ning saad kella käima panna.</span></div>${newProjectHtml()}</div>`;bindNew();return}
  const c=p.clock;let rows=[];try{rows=calculate(p,p.entries)}catch(e){}
  const t=(()=>{try{return projectTotals(p,rows)}catch(e){return null}})();
@@ -115,7 +115,7 @@ function wrap(p,quiet,endAt){const c=p.clock;if(!c)return false;const end=endAt?
  // Tavaline päev on kuni ~16 h. Pikem tähendab tihti, et kell jäi kogemata käima.
  const dm=d=>d.getDate()+'.'+(d.getMonth()+1)+'. ';const sameDay=e.date===e.endDate,hrs=Math.floor(worked/3600e3);
  const from=(sameDay?'':dm(start))+e.start,to=(sameDay?'':dm(end))+e.end;
- if(hrs>=16&&!confirm(`Kell on käinud ${hrs} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem eelvaates (Muuda).`))return false;
+ if(hrs>=16&&!confirm(`Kell on käinud ${hrs} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem: ava see päev projekti lehel.`))return false;
  if(!quiet&&!confirm(`Lõpetan: ${from} → ${to}${e.breaks?', paus '+e.breaks+' min':''}. Salvestan?`))return false;
  p.entries.push(e);delete p.clock;save();
  let sum='';try{const r=calculate(p,[e])[0];sum=' · '+h(r.mins)+(r.net!=null?' · '+money(r.net)+' ilma KM-ta':'')}catch(x){}
@@ -137,6 +137,10 @@ function bindNew(){const add=$d('ckAdd');if(!add)return;let kind='';
   setKind(n,kind);lastWrap=null;state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();renderClock()}}
 
 
+// Uus (Hoursi moodi) navigatsioon kasutab samu funktsioone.
+function newProject(name,kind){const n=project(name);const last=active()[0];if(!last){try{n.worker=localStorage.getItem(WORKER)||''}catch(e){}n.reportLang=(window.HoursI18n&&window.HoursI18n.lang)==='et'?'et':'en'}if(last)for(const k of ['worker','job','rate','vat','ot','double','triple','round','reportLang','pricing','dayRate','dayHours','rules'])if(last[k]!==undefined)n[k]=JSON.parse(JSON.stringify(last[k]));
+ setKind(n,kind);state.projects.push(n);state.selected=n.id;clockProject=n.id;try{localStorage.setItem('daybill.clockProject',n.id)}catch(e){}save();return n}
+window.DB={wrap:(p,q,end)=>wrap(p,q,end),newProject,active:()=>active(),priceLabel:p=>priceLabel(p),dayDialog:(p,e)=>dayDialog(p,e),elapsed:c=>elapsed(c),fmt:ms=>fmt(ms),hm:d=>hm(d),ymd:d=>ymd(d),standalone,setClock:id=>{clockProject=id;try{localStorage.setItem('daybill.clockProject',id)}catch(e){}},lastWrap:()=>lastWrap,clearWrap:()=>{lastWrap=null}};
 /* ---------- 3 · kokkuvõte (ilma raamatupidamiseta) ---------- */
 const eur=n=>(Math.round((Number(n)||0)*100)/100).toLocaleString('et-EE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 let sumYear=String(new Date().getFullYear());
@@ -365,8 +369,8 @@ function tourTip(p){let t='';try{t=localStorage.getItem(TOUR)||''}catch(e){}if(!
   :['Kõik on valmis.','Kui töö algab, vajuta „Call”. Daybill hakkab aega lugema.'];
  return `<div class="ck-tip" role="status"><strong>${msg[0]}</strong><br><span>${msg[1]}</span><button type="button" class="ck-tip-x" id="ckTipX" aria-label="Peida juhend">Peida juhend</button></div>`}
 // Teised aknad/sünk: kui andmed muutuvad, joonista kell uuesti.
-window.addEventListener('storage',e=>{if(e.key==='daybill.v1'){try{const s=JSON.parse(e.newValue);if(s&&Array.isArray(s.projects)){state.projects=s.projects;render();if(view==='clock')renderClock()}}catch(x){}}});
-window.daybillRefresh=()=>{try{render()}catch(e){}if(view==='clock')renderClock();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}running()};
+window.addEventListener('storage',e=>{if(e.key==='daybill.v1'){try{const s=JSON.parse(e.newValue);if(s&&Array.isArray(s.projects)){state.projects=s.projects;render();if(view==='clock')renderClock();try{window.daybillIosRefresh&&window.daybillIosRefresh()}catch(x){}}}catch(x){}}});
+window.daybillRefresh=()=>{try{render()}catch(e){}try{window.daybillIosRefresh&&window.daybillIosRefresh()}catch(e){}if(view==='clock')renderClock();if(view==='inv')try{window.TraageldusInvoices.render()}catch(e){}running()};
 // Kes on praegu tööl (telefoni kellast): näha ka arvutis projektide all.
 const run=document.createElement('p');run.className='help';run.id='dbRunning';$d('cloudStatus')&&$d('cloudStatus').after(run);
 function running(){const on=state.projects.filter(x=>!x.deleted&&x.clock);run.innerHTML=on.map(x=>`<strong>Tööl praegu:</strong> ${escH(x.name)} · alates ${hm(new Date(x.clock.start))}${x.clock.pausedAt?' (paus)':''} · ${fmt(elapsed(x.clock)).slice(0,5)} h`).join('<br>')}
@@ -390,7 +394,7 @@ function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createE
  <div class="dd-times"><p class="help dd-opt">Kellaajad (valikuline)</p><div class="dd-grid"><div><label for="ddStart">Algus</label><input id="ddStart" type="time" value="${edit?edit.start||'':''}"></div><div><label for="ddEnd">Lõpp</label><input id="ddEnd" type="time" value="${edit?edit.end||'':''}"></div></div></div>
  <div><label for="ddNote">Kirjeldus (valikuline)</label><input id="ddNote" maxlength="200" placeholder="nt valgustehnika ettevalmistus" value="${edit?escH(edit.comment||''):''}"></div>
  <p class="error" id="ddErr" role="alert"></p>
- <div class="actions"><button type="submit" class="primary" id="ddSave">${edit?'Salvesta':'Lisa'}</button><button type="button" id="ddCancel">Loobu</button></div></form>`;
+ <div class="actions"><button type="submit" class="primary" id="ddSave">${edit?'Salvesta':'Lisa'}</button><button type="button" id="ddCancel">Loobu</button>${edit?'<button type="button" id="ddDel" class="dd-del">Kustuta see päev</button>':''}</div></form>`;
  const $k=()=>dlg.querySelectorAll('[data-k]');
  const sync=()=>{$k().forEach(b=>{b.classList.toggle('primary',b.dataset.k===kind);b.setAttribute('aria-pressed',b.dataset.k===kind)});const shoot=kind==='shoot';
   const fx=isFixed(pr);dlg.querySelector('.dd-pay').hidden=shoot||fx;$d('ddFixed').hidden=shoot||!fx;$d('ddOwnBox').hidden=shoot||$d('ddPay').value!=='own';dlg.querySelector('.dd-opt').hidden=shoot;
@@ -398,6 +402,7 @@ function dayDialog(pr,edit){let dlg=$d('dbDayDlg');if(!dlg){dlg=document.createE
  $d('ddPay').value=payMode;$k().forEach(b=>b.onclick=()=>{kind=b.dataset.k;sync()});$d('ddPay').onchange=sync;sync();
  let touched=!!edit;$d('ddDate').oninput=()=>{touched=true};const cnt=$d('ddCount');if(cnt)cnt.oninput=()=>{const n=Math.round(Number(cnt.value));if(!touched&&first&&n>=1&&n<=31)$d('ddDate').value=addDays(first,-n)};
  $d('ddCancel').onclick=()=>dlg.close();
+ {const dd=$d('ddDel');if(dd)dd.onclick=()=>{const b=document.querySelector(`#entries [data-delete="${CSS.escape(edit.id)}"]`);if(!b)return;const n=pr.entries.length;b.click();if(pr.entries.length<n)dlg.close()}}
  $d('ddForm').onsubmit=ev=>{ev.preventDefault();const err=$d('ddErr');err.textContent='';
   try{const date=$d('ddDate').value;if(!date)throw Error('Vali kuupäev.');
    const n=edit?1:Math.round(Number(String($d('ddCount').value).replace(',','.')));if(!(n>=1&&n<=31))throw Error('Päevade arv peab olema 1 kuni 31.');

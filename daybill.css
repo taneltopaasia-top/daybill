@@ -438,3 +438,106 @@ button:active:not(:disabled){transform:translateY(1px)}
 #hoursView .day td:nth-child(2){white-space:nowrap;padding-right:16px}
 #hoursView .day-heading{font-size:15px}
 #hoursView .day-heading span:last-child{color:var(--muted);font-weight:400}
+/* ---------- v31: Hoursi moodi navigatsioon (nimekiri → projekt → Muuda) ---------- */
+html.ios{--ip-bg:#000;--ip-card:#1c1c1e;--ip-card2:#2c2c2e;--ip-sep:#38383a;--ip-text:#fff;--ip-sub:#8e8e93;--ip-fill:#fff;--ip-on:#000;--ip-red:#ff453a;--ip-green:#30d158;--ip-amber:#ffd60a}
+html.ios[data-theme=light]{--ip-bg:#f2f2f7;--ip-card:#fff;--ip-card2:#e5e5ea;--ip-sep:#c6c6c8;--ip-text:#000;--ip-sub:#6c6c70;--ip-fill:#000;--ip-on:#fff;--ip-red:#d70015;--ip-green:#248a3d;--ip-amber:#b25000}
+html.ios body{background:var(--ip-bg);color:var(--ip-text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:0;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+html.ios .db-bar,html.ios #clockView,html.ios #hoursView,html.ios .db-moved{display:none!important}
+html.ios main{max-width:640px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 16px 24px}
+html.ios .ip-view.hidden,html.ios .hidden.ip-view{display:none}
+html.ios .ip-top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 18px}
+html.ios .ip-seg{display:inline-flex;background:var(--ip-card);padding:4px;border-radius:999px!important;gap:2px}
+html.ios .ip-seg button{border:0;background:transparent;color:var(--ip-text);font-family:inherit;font-weight:600;font-size:15px;line-height:1;padding:10px 14px;min-height:0;border-radius:999px!important}
+html.ios .ip-seg button.on{background:var(--ip-card2)}
+html.ios .ip-round{width:48px;height:48px;min-height:0;padding:0;display:grid;place-items:center;border:0;background:var(--ip-card);color:var(--ip-text);border-radius:50%!important}
+html.ios .ip-big{font-size:40px;font-weight:700;letter-spacing:-.6px;margin:0 0 22px;line-height:1.05}
+html.ios .ip-cap{font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--ip-sub);margin:8px 0 6px}
+html.ios .ip-cap2{margin:26px 4px 8px}
+html.ios .ip-list{border-top:0}
+html.ios .ip-row{display:flex;width:100%;align-items:center;gap:12px;text-align:left;background:none;border:0;border-bottom:1px solid var(--ip-sep);padding:16px 0;min-height:0;color:var(--ip-text);font:inherit;border-radius:0!important}
+html.ios .ip-row-t{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+html.ios .ip-row strong{font-size:19px;font-weight:600}
+html.ios .ip-sub{color:var(--ip-sub);font-size:15px}
+html.ios .ip-small{font-size:13px;color:var(--ip-sub)}
+html.ios .ip-it{font-style:italic}
+html.ios .ip-chev{color:var(--ip-sub);opacity:.7;display:flex}
+html.ios .ip-tag{font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--ip-red)}
+html.ios .ip-empty{color:var(--ip-sub);padding:12px 0}
+html.ios .ip-done{margin-top:20px}html.ios .ip-done summary{color:var(--ip-sub);font-size:15px;padding:8px 0;cursor:pointer}
+html.ios .ip-foot{display:flex;gap:8px;align-items:center;color:var(--ip-sub);font-size:13px;margin:28px 0 10px}
+html.ios .ip-led{width:8px;height:8px;flex:none;border-radius:50%!important;background:var(--ip-amber)}
+html.ios .ip-led[data-s=ok]{background:var(--ip-green)}html.ios .ip-led[data-s=off],html.ios .ip-led[data-s=err]{background:var(--ip-red)}
+html.ios .ip-card{background:var(--ip-card);border-radius:22px!important;padding:0 18px;margin:0 0 18px;overflow:hidden}
+html.ios .ip-acts{padding:14px;display:flex;flex-direction:column;gap:12px}
+html.ios .ip-btn{display:block;width:100%;min-height:58px;padding:14px;border:1.5px solid var(--ip-text);background:transparent;color:var(--ip-text);font-family:inherit;font-weight:600;font-size:19px;line-height:1.2;border-radius:16px!important;text-align:center}
+html.ios .ip-btn.ip-fill{background:var(--ip-fill);color:var(--ip-on);border-color:var(--ip-fill)}
+html.ios .ip-btn.ip-danger{border-color:var(--ip-red);color:var(--ip-red)}
+html.ios .ip-btn:active,html.ios .ip-row:active,html.ios .ip-entry:active{opacity:.6}
+html.ios .ip-li{display:flex;justify-content:space-between;gap:12px;padding:17px 0;font-size:18px;border-bottom:1px solid var(--ip-sep)}
+html.ios .ip-li:last-child{border-bottom:0}
+html.ios .ip-li span:last-child{color:var(--ip-sub);font-variant-numeric:tabular-nums;text-align:right}
+html.ios .ip-li.ip-b{font-weight:700}html.ios .ip-li.ip-b span:last-child{color:var(--ip-text)}
+html.ios .ip-sum{padding:0 20px}
+html.ios .ip-nav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin:6px 0 26px;position:sticky;top:0;z-index:5;background:var(--ip-bg);padding:6px 0}
+html.ios .ip-title{text-align:center;font-weight:700;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.ios .ip-pill{min-height:44px;padding:0 18px;border:0;background:var(--ip-card);color:var(--ip-text);font-family:inherit;font-weight:500;font-size:17px;line-height:1;border-radius:999px!important}
+html.ios .ip-pill-on{font-weight:700}
+html.ios .ip-dayh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;color:var(--ip-sub);font-size:17px;font-weight:600;margin:24px 4px 8px;line-height:1.25}
+html.ios .ip-dayh span:last-child{text-align:right;white-space:nowrap}
+html.ios .ip-entry{display:flex;width:100%;gap:12px;align-items:flex-start;text-align:left;background:none;border:0;border-bottom:1px solid var(--ip-sep);padding:15px 0;min-height:0;color:var(--ip-text);font:inherit;border-radius:0!important}
+html.ios .ip-entry:last-child{border-bottom:0}
+html.ios .ip-time{font-size:19px;font-variant-numeric:tabular-nums}
+html.ios .ip-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right}
+html.ios .ip-num{font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}
+html.ios .ip-add{color:var(--ip-text);font-weight:500;font-size:17px;justify-content:flex-start}
+html.ios .ip-foot2{color:var(--ip-sub);font-size:14px;margin:-8px 6px 18px;line-height:1.4}
+html.ios .ip-note{display:flex;flex-direction:column;gap:4px;border-radius:16px!important;background:var(--ip-card);padding:14px 16px;margin:0 0 14px;font-size:15px}
+html.ios .ip-note span{color:var(--ip-sub)}
+html.ios .ip-warn{border:1.5px solid var(--ip-amber)}
+html.ios .ip-run{display:flex;flex-direction:column;gap:12px;padding:6px 4px}
+html.ios .ip-clock{font-size:56px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:-1px;line-height:1}
+html.ios .ip-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+html.ios .ip-link{background:none;border:0;color:var(--ip-sub);font-family:inherit;font-weight:500;font-size:15px;text-decoration:underline;padding:4px 0;min-height:0;text-align:left;border-radius:0!important}
+html.ios .ip-com{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ip-sub)}
+html.ios .ip-com input,html.ios .ip-field input{width:100%;min-height:48px;padding:10px 14px;background:var(--ip-card2);color:var(--ip-text);border:0;font-family:inherit;font-size:17px;border-radius:12px!important}
+html.ios .ip-runrow{display:flex;width:100%;justify-content:space-between;align-items:center;padding:16px 18px;border:1.5px solid var(--ip-red);color:var(--ip-text);text-align:left;font:inherit;min-height:0}
+html.ios .ip-runrow>span:first-child{display:flex;flex-direction:column;gap:4px}
+html.ios .ip-runtime{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums}
+/* alumine menüü */
+html.ios .ip-tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:space-around;background:color-mix(in srgb,var(--ip-bg) 86%,transparent);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid var(--ip-sep);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+html.ios .ip-tabs button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;color:var(--ip-sub);font-family:inherit;font-weight:500;font-size:11px;line-height:1;padding:6px 0;min-height:0;border-radius:0!important}
+html.ios .ip-tabs button.on{color:var(--ip-text)}
+html.ios .ip-dot{position:absolute;top:4px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%!important;background:transparent}
+html.ios .ip-dot[data-s=off],html.ios .ip-dot[data-s=err]{background:var(--ip-red)}
+html.ios.ip-lock{overflow:hidden}html.ios.ip-lock .ip-tabs{display:none}
+/* alt avanev leht */
+html.ios .ip-sheet{position:fixed;inset:0;z-index:60;background:#0008;display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
+html.ios .ip-sheet.on{opacity:1}html.ios .ip-sheet.hidden{display:none}
+html.ios .ip-sheet-in{width:100%;max-width:640px;height:calc(100% - 44px - env(safe-area-inset-top));background:var(--ip-bg);border-radius:22px 22px 0 0!important;display:flex;flex-direction:column;transform:translateY(30px);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+html.ios .ip-sheet.on .ip-sheet-in{transform:none}
+html.ios .ip-sheet-h{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:14px 14px 10px}
+html.ios .ip-sheet-h strong{text-align:center;font-size:18px}
+html.ios .ip-sheet-b{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:6px 16px calc(30px + env(safe-area-inset-bottom))}
+html.ios .ip-sheet-x{display:flex;flex-direction:column;gap:12px;margin:8px 0 16px}
+html.ios .ip-field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ip-sub)}
+html.ios .ip-kind{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+html.ios .ip-kind button{display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;min-height:76px;background:var(--ip-card);border:1.5px solid var(--ip-sep);color:var(--ip-text);font:inherit;border-radius:16px!important}
+html.ios .ip-kind button strong{font-size:17px}html.ios .ip-kind button span{font-size:12px;color:var(--ip-sub)}
+html.ios .ip-kind button.on{border-color:var(--ip-text);background:var(--ip-card2)}
+html.ios .ip-saved{color:var(--ip-sub);font-size:14px;display:flex;flex-direction:column;gap:4px}
+/* sama vorm lehe sees: ümarad väljad nagu Hoursis, vormi enda nupud on lehe ülaservas */
+html.ios .ip-sheet-b form{background:var(--ip-card);border-radius:22px!important;padding:16px;margin:0 0 14px}
+html.ios .ip-sheet-b input,html.ios .ip-sheet-b select,html.ios .ip-sheet-b textarea{border-radius:12px!important;background:var(--ip-card2);border-color:transparent;color:var(--ip-text)}
+html.ios .ip-sheet-b button:not(.ip-btn):not(.ip-pill){border-radius:12px!important}
+html.ios .ip-sheet-b #entry #add,html.ios .ip-sheet-b #entry #cancel,html.ios .ip-sheet-b #entry #preview,html.ios .ip-sheet-b #costAdd,html.ios .ip-sheet-b #costCancel,html.ios .ip-sheet-b #settings button[type=submit]{display:none!important}
+html.ios .ip-sheet-b label{color:var(--ip-sub)}
+html.ios #invView,html.ios #settingsView,html.ios #historyView{padding-top:calc(14px + env(safe-area-inset-top))}
+@media (prefers-reduced-motion:reduce){html.ios .ip-sheet,html.ios .ip-sheet-in{transition:none}}
+/* v31: Arved, Ajalugu ja Seaded samas stiilis (ümarad väljad ja nupud, kaardid) */
+html.ios :is(#invView,#settingsView,#historyView) :is(button,input,select,textarea){border-radius:12px!important}
+html.ios :is(#invView,#settingsView,#historyView) :is(input,select,textarea){background:var(--ip-card2);border-color:transparent;color:var(--ip-text);min-height:46px}
+html.ios :is(#invView,#settingsView,#historyView) button{min-height:44px;font-family:inherit;font-weight:600}
+html.ios :is(#invView,#settingsView,#historyView) h1{font-size:40px;font-weight:700;letter-spacing:-.6px;margin:6px 0 20px}
+html.ios :is(#invView,#settingsView,#historyView) :is(.db-send,.inv-warn,.set-note,.inv-total>div,details.db-how>div){border-radius:18px!important;background:var(--ip-card);border-color:transparent}
+html.ios :is(#invView,#settingsView,#historyView) table{font-size:15px}
+.db-day-dlg .actions{flex-wrap:wrap}.db-day-dlg .actions .dd-del{flex-basis:100%;background:none;border:1px solid var(--ip-red,#d70015);color:var(--ip-red,#d70015)}
