@@ -159,7 +159,7 @@ let zebra=0;for(const [date,day] of dayGroups(rows).reverse()){day.forEach((e,i)
  const nl=notes.length?wrap(notes.join(' · '),95):[];const h=14+nl.length*10;need(h+2);
  if(zebra++%2===0)fill(36,y-h+10,523,h,0.965);
  if(i===0)text(C.date,y,short(date),9);
- const end=shiftEndDate(e)!==e.date?' (+1)':'';text(C.time,y,e.start?e.start+'–'+e.end+end:(e.type?DAY_TYPES[e.type][lang]:hasPay(e)?L('Day rate','Päevatasu'):''),9);
+ text(C.time,y,e.start?e.start+'–'+e.end:(e.type?DAY_TYPES[e.type][lang]:hasPay(e)?L('Day rate','Päevatasu'):''),9);
  text(C.hrs,y,e.start?num(e.mins):'–',9,{right:1});text(C.ot,y,H(e.ot),9,{right:1,gray:!e.ot});text(C.dbl,y,H(e.dbl),9,{right:1,gray:!e.dbl});if(tri)text(C.trip,y,H(e.trip),9,{right:1,gray:!e.trip});
  if(!fx)text(C.net,y,M(e.net),9,{right:1});y-=12;for(const n of nl){text(C.time,y,n,7.5,{gray:1});y-=10}y-=2})}
 if(rows.length){line(y+6,0.6)}
