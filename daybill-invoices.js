@@ -41,7 +41,9 @@ function formatNumber(seq,period,fmt){return fmt==='year'?period+'-'+pad(seq,3):
 function usedSeqs(period,fmt){return new Set(list.filter(x=>x.period===period&&(x.numberFormat||'month')===fmt).map(x=>Number(x.seq)))}
 function nextNumber(date){const fmt=settings.numberFormat,period=periodOf(date,fmt),used=usedSeqs(period,fmt);let seq=used.size?Math.max(...used)+1:Math.max(1,Number(settings.firstSeq)||1);while(used.has(seq))seq++;return {seq,period,fmt,number:formatNumber(seq,period,fmt)}}
 // Hoursist toodud arved (admin) kuuluvad Hoursi registrisse: nende numbreid kontrollib Hours.
-const admin=()=>!!settings.hoursAdmin;
+// Hoursiga on seotud AINULT omaniku konto: teise kontoga sisse loginuna ei kehti hoursAdmin kunagi.
+const HOURS_OWNER='taneltopaasia@gmail.com';
+const admin=()=>{if(!settings.hoursAdmin)return false;const e=window.daybillEmail&&window.daybillEmail();return !e||e===HOURS_OWNER};
 function integrity(){const errs=[],seen=new Map();for(const x of list){if(x.deleted||x.fromHours)continue;const k=(x.numberFormat||'month')+'|'+x.number;if(seen.has(k))errs.push(`Number ${x.number} on registris kaks korda (${seen.get(k).client.name} ja ${x.client.name}). Uusi arveid ei koostata enne, kui see on lahendatud.`);else seen.set(k,x)}return errs}
 
 /* ---------- summa sõnadega ---------- */

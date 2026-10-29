@@ -16,6 +16,7 @@ function lastSync(){try{return Number(localStorage.getItem(lk()))||0}catch(e){re
 function seen(u){if(u>lastSync())try{localStorage.setItem(lk(),String(u))}catch(e){}}
 export function usage(){let b=0;try{for(const p of state.projects)if(!p.deleted)b+=JSON.stringify(p).length;for(const x of window.TraageldusInvoices.all())if(!x.deleted)b+=JSON.stringify(x).length;b+=JSON.stringify(window.DaybillSettings.get()).length}catch(e){}return Math.round(b*1.6)}
 window.daybillUsage=()=>({used:usage(),cap:CAP});
+window.daybillEmail=()=>user&&user.email?String(user.email).toLowerCase():'';
 const setStatus=(t,c)=>{status=t;try{document.documentElement.dataset.sync=c||'wait';window.daybillConn&&window.daybillConn()}catch(e){}const el=$('dbSync');if(el)el.textContent=t;const cs=$('cloudStatus');if(cs)cs.textContent=t};
 const fp=v=>JSON.stringify(canon(v));
 const canon=v=>Array.isArray(v)?v.map(canon):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).filter(k=>!k.startsWith('_')&&k!=='draft'&&k!=='draftEditing'&&k!=='beforeEdit').sort().map(k=>[k,canon(v[k])])):v;
