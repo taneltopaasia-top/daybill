@@ -159,10 +159,12 @@ async function issue(){msg='';if(admin()){alertBox('Sinu arved teeb Hours (Macis
  list.push(x);saveList([x]);const pid=x.hoursProject;draft=fresh();tab='list';msg=`Arve ${escH(x.number)} on koostatud ja salvestatud. PDF laaditi alla.`;await deliverPdf(x);render();try{if(pid&&typeof render==='function'&&window.hoursInvoicesChanged)window.hoursInvoicesChanged()}catch(e){}}
 function preview(){const c=computed();if(!c.rows.length){msg='Lisa vähemalt üks rida.';render();return}const x=build({number:(draft.lang==='en'?'DRAFT ':'EELVAADE ')+nextNumber(draft.date).number});deliverPdf(x)}
 function update(x,changes){Object.assign(x,changes,{_u:Date.now(),updatedAt:new Date().toISOString()});saveList([x]);render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}
-function creditNote(x){if(admin()||x.fromHours){alertBox('Kreeditarve tee Hoursis (Macis), kus on sinu arvete register.');return}if(credited(x)){alertBox('See arve on juba täielikult krediteeritud.');return}if(!confirm(`Koostan kreeditarve arvele ${x.number}. See tühistab arve summa (${eurUi(x.gross)}). Jätkan?`))return;
+async function creditNote(x){if(admin()||x.fromHours){alertBox('Kreeditarve tee Hoursis (Macis), kus on sinu arvete register.');return}if(credited(x)){alertBox('See arve on juba täielikult krediteeritud.');return}if(!confirm(`Koostan kreeditarve arvele ${x.number}. See tühistab arve summa (${eurUi(x.gross)}). Jätkan?`))return;
  const saved={...draft};draft={...fresh(),date:isoToday()<x.date?x.date:isoToday(),lang:x.lang,vat:x.vatRate,client:{name:x.client.name,code:x.client.code||'',vatNo:x.client.vatNo||'',line1:x.client.lines[0]||'',line2:x.client.lines[1]||'',email:x.client.email||''},rows:x.rows.map(r=>({...r,price:-r.price}))};
  if(!sellerReady()){draft=saved;alertBox('Täida enne arvepõhi (Arve → Arvepõhi).');return}
  const c=build({credit:true,creditFor:x.id,creditNumber:x.number,days:0,due:draft.date});c.rows=x.rows.map(r=>({...r,price:-r.price,total:-r.total}));c.net=-x.net;c.vat=-x.vat;c.gross=-x.gross;c.words=amountWords(c.gross,c.lang);c.hoursProject=x.hoursProject||'';c.hoursNet=undefined;draft=saved;
+ // Kreeditarve kasutab sama numeratsiooni: number broneeritakse pilves nagu tavalisel arvel, et teine seade sama numbrit ei annaks.
+ try{if(window.daybillReserveNumber)await window.daybillReserveNumber(c)}catch(e){alertBox(e.message||String(e));return}
  list.push(c);saveList([c]);msg=`Kreeditarve ${escH(c.number)} on koostatud. Arve ${escH(x.number)} on nüüd krediteeritud.`;deliverPdf(c);render();try{window.hoursInvoicesChanged&&window.hoursInvoicesChanged()}catch(e){}}
 function alertBox(t){alert(t)}
 

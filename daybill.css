@@ -541,3 +541,6 @@ html.ios :is(#invView,#settingsView,#historyView) h1{font-size:40px;font-weight:
 html.ios :is(#invView,#settingsView,#historyView) :is(.db-send,.inv-warn,.set-note,.inv-total>div,details.db-how>div){border-radius:18px!important;background:var(--ip-card);border-color:transparent}
 html.ios :is(#invView,#settingsView,#historyView) table{font-size:15px}
 .db-day-dlg .actions{flex-wrap:wrap}.db-day-dlg .actions .dd-del{flex-basis:100%;background:none;border:1px solid var(--ip-red,#d70015);color:var(--ip-red,#d70015)}
+/* Kitsas telefon (320 px): arve summad ei lähe ekraanist välja */
+.inv-total>div{min-width:0}.inv-total strong{overflow-wrap:anywhere}
+@media(max-width:400px){.inv-total{gap:8px}.inv-total strong,html.ios .inv-total strong{font-size:17px;letter-spacing:-.3px}}
