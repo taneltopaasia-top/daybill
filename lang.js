@@ -1866,7 +1866,8 @@ const EN=/*EN-START*/{
 "Lõpuaeg ei saa olla tulevikus. Kui töö veel käib, vajuta hiljem „Lõpeta töö”.":"The end time can’t be in the future. If work is still going on, tap “Stop work” later.",
 "Tööpäevi":"Working days",
 "Arvestatud tunnid":"Billable hours",
-"Kell on käinud {0} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem: ava see päev projekti lehel.":"The clock has been running for {0} hours. If that is right, tap OK. If you forgot to stop it, save anyway and fix the end time later: open that day on the project page."
+"Kell on käinud {0} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem: ava see päev projekti lehel.":"The clock has been running for {0} hours. If that is right, tap OK. If you forgot to stop it, save anyway and fix the end time later: open that day on the project page.",
+"Lisatasud: {0}. Need tulevad tööreeglitest. Kui mõni ei kehti, lülita see „Muuda” all välja.":"Extras: {0}. They come from the working conditions. If one doesn't apply, switch it off under “Edit”.",
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

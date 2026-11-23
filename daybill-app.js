@@ -106,6 +106,7 @@ function drawProject(p){stopTick();
  <div class="ip-card ip-acts">${p.clock?runHtml(p):`<button type="button" class="ip-btn ip-fill" id="ipCall">Alusta tööd</button><button type="button" class="ip-btn" id="ipToday">Lisa tänane tööpäev</button><button type="button" class="ip-btn" id="ipManual">Lisa tehtud tunnid käsitsi</button>`}</div>
  <div class="ip-card ip-sum">${sum.map(([k,v,b])=>`<div class="ip-li${b?' ip-b':''}"><span>${escH(k)}</span><span>${escH(v)}</span></div>`).join('')}</div>
  ${io?'<p class="ip-foot2">See projekt on tehtud otse arvel, tunde pole sisestatud. Tunde võid soovi korral lisada.</p>':''}
+ ${R&&!fixed&&!io&&t&&t.extras>0?`<p class="ip-foot2">${escH('Lisatasud: '+extrasSummary(rows)+'. Need tulevad tööreeglitest. Kui mõni ei kehti, lülita see „Muuda” all välja.')}</p>`:''}
  ${R&&!fixed&&!io?`<p class="ip-foot2">Tööreeglid: ${escH(R.set==='film'?'Film':R.set==='commercial'?'Reklaam':'Oma valik')}, võttepäev ${escH(String(R.day))} h, päevatasu ${escH(money((Number(p.rate)||0)*R.day))}.</p>`:''}
  ${(p.entries||[]).length||(p.expenses||[]).length?`<div class="ip-card ip-acts"><button type="button" class="ip-btn ip-fill" id="ipPdf">Tööaja ja kulude ülevaade (PDF)</button><button type="button" class="ip-btn" id="ipSend">Saada produtsendile</button></div>`:''}
  ${days.map(d=>{const g=groups[d],mins=g.reduce((s,r)=>s+(r.mins||0),0),net=g.reduce((s,r)=>s+(r.net||0),0),[wd,dm]=longDay(d);
@@ -126,10 +127,14 @@ function drawProject(p){stopTick();
  proj.querySelectorAll('[data-ie]').forEach(b=>b.onclick=()=>entrySheet(p,'edit',b.dataset.ie));
  proj.querySelectorAll('[data-ic]').forEach(b=>b.onclick=()=>costSheet(p,b.dataset.ic));
  if(p.clock)startTick()}
+// Lisatasu nimi ja arvutus (nt „Öötöö 22–06 4 h × 5,94 €”), et oleks näha, mis summa juurde tuli ja miks.
+function extraLabel(x){try{return extraText(x)}catch(e){return x.key||''}}
+function extrasSummary(rows){const g=[];for(const r of rows)for(const x of r.extras||[]){const k=x.key+'|'+(x.unit??'');let a=g.find(y=>y.k===k);if(!a)g.push(a={k,key:x.key,unit:x.unit,qty:0,amount:0});a.qty+=Number(x.qty)||0;a.amount+=Number(x.amount)||0}
+ return g.map(a=>extraLabel({key:a.key,unit:a.unit,qty:Math.round(a.qty*100)/100})+' = '+money(Math.round(a.amount*100)/100)).join('; ')}
 function entryHtml(r,p,fixed){const ex=r.extras||[];let type='';try{type=r.type&&DAY_TYPES[r.dayType]?DAY_TYPES[r.dayType][lang()==='en'?'en':'et']:''}catch(e){}
  const sub=[r.job,type,r.breaks&&!r.type?'paus '+r.breaks+' min':'',r.lunch?'lõuna '+r.lunch:r.noLunch?'lõunat ei olnud':'',r.endDate&&r.endDate!==r.date&&r.start?'lõpeb '+longDay(r.endDate).join(' '):''].filter(Boolean);
  const ot=(r.ot||0)+(r.dbl||0)+(r.trip||0)>0?hmm(r.mins)+' · 1,5× '+hmm(r.ot).replace(' h','')+' · 2× '+hmm(r.dbl).replace(' h','')+(r.trip?' · 3× '+hmm(r.trip).replace(' h',''):''):hmm(r.mins);
- return `<button type="button" class="ip-entry" data-ie="${escH(r.id)}"><span class="ip-row-t"><span class="ip-time">${r.start?escH(r.start)+' → '+escH(r.end):escH(type||'Muu päev')}</span>${sub.length?`<span class="ip-sub">${sub.map(x=>`<span>${escH(x)}</span>`).join(' · ')}</span>`:''}${fixed?'':ex.map(x=>`<span class="ip-small">+ ${escH(x.text)} · ${escH(money(x.amount))}</span>`).join('')}${r.comment?`<span class="ip-sub ip-it">${escH(r.comment)}</span>`:''}</span><span class="ip-right">${fixed?'':`<span class="ip-num">${money(r.net)}</span>`}<span class="ip-sub">${escH(ot)}</span></span></button>`}
+ return `<button type="button" class="ip-entry" data-ie="${escH(r.id)}"><span class="ip-row-t"><span class="ip-time">${r.start?escH(r.start)+' → '+escH(r.end):escH(type||'Muu päev')}</span>${sub.length?`<span class="ip-sub">${sub.map(x=>`<span>${escH(x)}</span>`).join(' · ')}</span>`:''}${fixed?'':ex.map(x=>`<span class="ip-small">+ ${escH(extraLabel(x))} · ${escH(money(x.amount))}</span>`).join('')}${r.comment?`<span class="ip-sub ip-it">${escH(r.comment)}</span>`:''}</span><span class="ip-right">${fixed?'':`<span class="ip-num">${money(r.net)}</span>`}<span class="ip-sub">${escH(ot)}</span></span></button>`}
 
 /* ---------- kell ---------- */
 let tickT=null;
