@@ -892,7 +892,7 @@ const EN=/*EN-START*/{
 "rakendub ({0} €)":"applies ({0} €)",
 "Reede":"Friday",
 "reede":"Friday",
-"Reeglid tulevad Eesti valgustusosakonna soovituslikust miinimumtabelist (2025). Võttepäev sisaldab lõunat. Tunnihind = päevatasu ÷ võttepäeva tunnid. Valimisel seatakse ületunnid: 1,5× pärast võttepäeva, 2× 2 tundi hiljem, 3× veel 3 tundi hiljem. Lülita välja need, milles selles projektis kokku ei lepitud.":"The rules come from the Estonian lighting department's suggested minimum rates (2025). A shooting day includes lunch. Hourly rate = day rate ÷ shooting day hours. Choosing a set sets overtime: 1.5× after the shooting day, 2× 2 hours later, 3× another 3 hours later. Switch off whatever was not agreed for this project.",
+"Reeglid tulevad Eesti valgustusosakonna soovituslikust miinimumtabelist (2025). Võttepäev sisaldab lõunat. Tunnihind = päevatasu ÷ võttepäeva tunnid. Valimisel seatakse ületunnid: 1,5× pärast võttepäeva, 2× 2 tundi hiljem, 3× veel 3 tundi hiljem. Lisatasud ja trahvid on alguses väljas: lülita sisse ainult need, milles selles projektis kokku lepiti.":"The rules come from the Estonian lighting department's suggested minimum rates (2025). A shooting day includes lunch. Hourly rate = day rate ÷ shooting day hours. Choosing a set sets overtime: 1.5× after the shooting day, 2× 2 hours later, 3× another 3 hours later. Extras and penalties start switched off: switch on only the ones agreed for this project.",
 "Register ja Dropboxi kaust ei klapi. Uut arvet ei saa enne koostada, kui see on korras.":"The register and the Dropbox folder do not match. A new invoice cannot be created until this is fixed.",
 "Registrijärgne aadress äriregistrist; muuda allpool, kui tegelik aadress on teine.":"Registered address from the business register; change it below if the actual address is different.",
 "Registrikood":"Registry code",
@@ -1866,7 +1866,8 @@ const EN=/*EN-START*/{
 "Lõpuaeg ei saa olla tulevikus. Kui töö veel käib, vajuta hiljem „Lõpeta töö”.":"The end time can’t be in the future. If work is still going on, tap “Stop work” later.",
 "Tööpäevi":"Working days",
 "Arvestatud tunnid":"Billable hours",
-"Kell on käinud {0} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem: ava see päev projekti lehel.":"The clock has been running for {0} hours. If that is right, tap OK. If you forgot to stop it, save anyway and fix the end time later: open that day on the project page."
+"Kell on käinud {0} tundi. Kui see on õige, vajuta OK. Kui kell jäi kogemata käima, salvesta ikka ja paranda lõpuaeg hiljem: ava see päev projekti lehel.":"The clock has been running for {0} hours. If that is right, tap OK. If you forgot to stop it, save anyway and fix the end time later: open that day on the project page.",
+"Lisatasud: {0}. Need tulevad tööreeglitest. Kui mõni ei kehti, lülita see „Muuda” all välja.":"Extras: {0}. They come from the working conditions. If one doesn't apply, switch it off under “Edit”.",
 /*DAYBILL-END*/
 }/*EN-END*/;
 const MONTHS=['jaanuar','veebruar','märts','aprill','mai','juuni','juuli','august','september','oktoober','november','detsember'];

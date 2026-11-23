@@ -51,10 +51,19 @@ async function reserve(x){if(!user)return;const {F,db}=fb;if(!navigator.onLine)t
 
 /* ---------- vastuvõtt ---------- */
 function editingNow(){const a=document.activeElement;return a&&a.matches&&a.matches('#hoursView input,#hoursView textarea,#hoursView select')}
-function applyProjects(docs){if(editingNow()){pendingRemote=docs;return}let changed=false;
- for(const d of docs){seen(d.u||0);if(d.deleted){const i=state.projects.findIndex(p=>p.id===d.id);pushed.set('p:'+d.id,hash('deleted'));if(i>=0){state.projects.splice(i,1);changed=true}continue}let r;try{r=JSON.parse(d.data)}catch(e){continue}const i=state.projects.findIndex(p=>p.id===r.id),l=state.projects[i];pushed.set('p:'+r.id,hash(fp(r)));
-  if(!l){state.projects.push(r);changed=true}else if((r._u||0)>(l._u||0)&&fp(r)!==fp(l)){r.draft=l.draft;r.draftEditing=l.draftEditing;state.projects[i]=r;changed=true}}
- savePushed();if(changed){if(!state.projects.some(p=>p.id===state.selected))state.selected=null;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}try{window.daybillRefresh&&window.daybillRefresh()}catch(e){}}}
+// Kui selles seadmes on veel pilve saatmata muudatusi (nt telefon oli võttel ilma internetita) ja teine seade muutis sama projekti,
+// ei visata kohalikke päevi ega kulusid ära: pilve versioonile lisatakse siinsed päevad ja kulud, mida seal pole. Kattuvat päeva topelt ei lisata.
+const span=e=>{const a=Date.parse(e.date+'T'+(e.start||'00:00')+':00Z'),b=Date.parse((e.endDate||e.date)+'T'+(e.end||e.start||'00:00')+':00Z');return [a,b>a?b:a+1]};
+function mergeLocal(r,l){const m=JSON.parse(JSON.stringify(r));m.draft=l.draft;m.draftEditing=l.draftEditing;m.entries=m.entries||[];
+ const ids=new Set(m.entries.map(e=>e.id));for(const e of l.entries||[]){if(ids.has(e.id))continue;const [a,b]=span(e);if(m.entries.some(x=>{const [c,d]=span(x);return a<d&&c<b}))continue;m.entries.push(e)}
+ if((l.expenses||[]).length){m.expenses=m.expenses||[];const cid=new Set(m.expenses.map(c=>c.id));for(const c of l.expenses)if(!cid.has(c.id))m.expenses.push(c)}
+ if(l.clock&&!m.clock&&!m.entries.some(e=>e.source==='Daybill kell'&&Math.abs(span(e)[0]-Date.parse(l.clock.start))<36e5*14))m.clock=l.clock;
+ return m}
+function applyProjects(docs){if(editingNow()){pendingRemote=docs;return}let changed=false,merged=false;
+ for(const d of docs){seen(d.u||0);if(d.deleted){const i=state.projects.findIndex(p=>p.id===d.id);pushed.set('p:'+d.id,hash('deleted'));if(i>=0){state.projects.splice(i,1);changed=true}continue}let r;try{r=JSON.parse(d.data)}catch(e){continue}const i=state.projects.findIndex(p=>p.id===r.id),l=state.projects[i];
+  const dirty=!!l&&pushed.get('p:'+l.id)!==hash(l.deleted?'deleted':fp(l));pushed.set('p:'+r.id,hash(fp(r)));
+  if(!l){state.projects.push(r);changed=true}else if((r._u||0)>(l._u||0)&&fp(r)!==fp(l)){if(dirty){const m=mergeLocal(r,l);state.projects[i]=m;if(fp(m)!==fp(r))merged=true}else{r.draft=l.draft;r.draftEditing=l.draftEditing;state.projects[i]=r}changed=true}}
+ savePushed();if(merged)projectsChanged();if(changed){if(!state.projects.some(p=>p.id===state.selected))state.selected=null;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}try{window.daybillRefresh&&window.daybillRefresh()}catch(e){}}}
 document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRemote&&!editingNow()){const d=pendingRemote;pendingRemote=null;applyProjects(d)}},0));
 
 /* Selle seadme andmed kuuluvad ühele kontole (daybill.owner). Kui sisse logib teine konto, tühjendatakse seade
@@ -78,7 +87,8 @@ async function start(u){if(u&&!own(u))return;user=u;for(const f of unsub)f();uns
  const {F,db}=fb;setStatus('Sünkroonin…');
  loadPushed();const since=lastSync(),first=!since;
  // Loetakse ainult muudatused pärast viimast sünki (u > since), nii jäävad tasuta paketi lugemised väikseks.
- const q=c=>F.query(F.collection(db,'users',u.uid,c),F.where('u','>',since));
+ // 15 min varu: kui teise seadme kell on veidi taga, ei jää tema muudatus kunagi saamata (topelt saabunud kirjed jätab vastuvõtt vahele).
+ const q=c=>F.query(F.collection(db,'users',u.uid,c),F.where('u','>',first?0:Math.max(0,since-15*60*1000)));
  let firstProjects=true,firstInvoices=true;
  unsub.push(F.onSnapshot(q('projects'),snap=>{const docs=snap.docChanges().filter(c=>c.type!=='removed'&&!c.doc.metadata.hasPendingWrites).map(c=>({...c.doc.data(),id:c.doc.id}));
   if(docs.length)applyProjects(docs);
